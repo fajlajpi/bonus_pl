@@ -19,11 +19,17 @@ from django.contrib.auth.views import LoginView, LogoutView
 from django.urls import path
 from django.shortcuts import redirect
 from django.views.generic import TemplateView, RedirectView
-from pa_bonus.views import views_managers as vm, views_users as vu, views_public as vp, views_reports as vr
+from pa_bonus.views import views_managers as vm, views_users as vu, views_public as vp, views_reports as vr, views_salesreps as vs
 from pa_bonus.forms import EmailAuthenticationForm
 
 def home_redirect(request):
-    """Redirects the root URL to dashboard."""
+    """Redirects the root URL based on user role."""
+    if not request.user.is_authenticated:
+        return redirect('login')
+    if request.user.groups.filter(name='Managers').exists():
+        return redirect('manager_dashboard')
+    if request.user.groups.filter(name='Sales Reps').exists():
+        return redirect('salesrep_dashboard')
     return redirect('dashboard')
 
 urlpatterns = []
@@ -73,6 +79,15 @@ urlpatterns.extend([
          name='reward_request_quick_edit'),
     path('manager/reports/', vr.ReportsHubView.as_view(), name='reports_hub'),
     path('manager/reports/download/', vr.ReportDownloadView.as_view(), name='report_download'),
+])
+
+# SALES REP FACING URLS
+urlpatterns.extend([
+    path('salesrep/', vs.SalesRepDashboardView.as_view(), name='salesrep_dashboard'),
+    path('salesrep/clients/', vs.SalesRepClientListView.as_view(), name='salesrep_clients'),
+    path('salesrep/clients/<int:pk>/', vs.SalesRepClientDetailView.as_view(), name='salesrep_client_detail'),
+    path('salesrep/reward-requests/', vs.SalesRepRewardRequestsView.as_view(), name='salesrep_reward_requests'),
+    path('salesrep/clients/<int:pk>/create-request/', vs.SalesRepCreateRewardRequestView.as_view(), name='salesrep_create_reward_request'),
 ])
 
 # ADMIN URLS

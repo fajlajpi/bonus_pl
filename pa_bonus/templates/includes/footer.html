@@ -10,10 +10,13 @@
             <a href="{% url 'privacy_policy' %}">Zásady ochrany osobních údajů</a>
             <a href="{% url 'contact' %}">Kontaktní informace</a>
             {% if user.is_staff %}
-                <a href="{% url 'admin:index' %}">Administrace</a>
+                <a href="{% url 'admin:index' %}">Admin Panel</a>
             {% endif %}
             {% if user.groups.all.0.name == 'Managers' %}
-                <a href="{% url 'manager_dashboard' %}">Manažerská sekce</a>
+                <a href="{% url 'manager_dashboard' %}">Manager Dashboard</a>
+            {% endif %}
+            {% if user.groups.all.0.name == 'Sales Reps' %}
+                <a href="{% url 'salesrep_dashboard' %}">Sales Rep Dashboard</a>
             {% endif %}
         </div>
     </div>

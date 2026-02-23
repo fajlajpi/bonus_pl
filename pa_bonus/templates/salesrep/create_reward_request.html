@@ -1,0 +1,84 @@
+{% extends "base.html" %}
+{% block title %}Create Reward Request for {{ client.first_name }} {{ client.last_name }}{% endblock %}
+
+{% block content %}
+<div class="dashboard-container">
+  <div class="page-header">
+    <h2>Create Reward Request</h2>
+    <p class="page-description">
+      For client: <strong>{{ client.first_name }} {{ client.last_name }}</strong>
+      ({{ client.user_number }})
+      · Available balance: <strong>{{ client_balance }} pts</strong>
+    </p>
+  </div>
+
+  <a href="{% url 'salesrep_client_detail' client.pk %}" class="details-link" style="display:inline-block; margin-bottom: 1rem;">
+    ← Back to client detail
+  </a>
+
+  {% if rewards %}
+  <form method="post">
+    {% csrf_token %}
+
+    <div class="dashboard-section">
+      <h3>Available Rewards</h3>
+      <div class="table-container">
+        <table class="transactions-table">
+          <thead>
+            <tr>
+              <th>Reward</th>
+              <th>Brand</th>
+              <th>Point Cost</th>
+              <th>Availability</th>
+              <th>Quantity</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for reward in rewards %}
+            <tr>
+              <td>{{ reward.name }}</td>
+              <td>{{ reward.brand.name|default:"Any" }}</td>
+              <td class="value">{{ reward.point_cost }} pts</td>
+              <td>
+                <span class="status-badge {{ reward.availability|lower }}">
+                  {{ reward.get_availability_display|default:reward.availability }}
+                </span>
+              </td>
+              <td style="width: 100px;">
+                <input type="number"
+                       name="reward_quantity_{{ reward.pk }}"
+                       value="0"
+                       min="0"
+                       max="99"
+                       class="form-control"
+                       style="width: 70px; padding: 0.3rem; text-align: center;">
+              </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Optional note -->
+    <div class="dashboard-section">
+      <h3>Note (optional)</h3>
+      <textarea name="rep_note"
+                rows="3"
+                class="form-control"
+                style="width: 100%; padding: 0.5rem;"
+                placeholder="Add a note for this request (visible to managers)..."></textarea>
+    </div>
+
+    <div class="form-actions" style="margin-top: 1rem;">
+      <button type="submit" class="btn-filter">Submit Reward Request</button>
+      <a href="{% url 'salesrep_client_detail' client.pk %}" class="btn-reset" style="text-decoration:none;">Cancel</a>
+    </div>
+  </form>
+  {% else %}
+  <div class="dashboard-section">
+    <p>No rewards available for this client's contract brands.</p>
+  </div>
+  {% endif %}
+</div>
+{% endblock %}

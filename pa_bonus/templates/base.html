@@ -14,6 +14,13 @@
             <nav class="user-nav">
                 {% if user.is_authenticated %}
                     Přihlášen jako <em>{{ user.username }}</em>
+                    {% if user.groups.all.0.name == 'Managers' %}
+                        <a href="{% url 'manager_dashboard' %}">Manager</a>
+                    {% endif %}
+                    {% if user.groups.all.0.name == 'Sales Reps' %}
+                        <a href="{% url 'salesrep_dashboard' %}">Sales Rep</a>
+                        <a href="{% url 'salesrep_clients' %}">My Clients</a>
+                    {% endif %}
                     <a href="{% url 'dashboard' %}">Přehled</a>
                     <form action="{% url 'logout' %}" method="post">
                         {% csrf_token %}

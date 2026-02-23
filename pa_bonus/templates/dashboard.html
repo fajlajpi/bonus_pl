@@ -17,9 +17,8 @@
         <h3>Bonusy za značky</h3>
         <ul>
         {% for bonus in brand_bonuses %}
-            <li><strong>{{ bonus.brand_id.name }}</strong>: {{ 1|divide:bonus.points_ratio }} Kč fakturace bez DPH na 1 bod</li>
+            <li><strong>{{ bonus.brand_id.name }}</strong>: 500 PLN fakturace bez DPH na 1 bod</li>
         {% endfor %}
-        </ul>
     </div>
     {% else %}
     <p>Bez aktivních členství.</p>

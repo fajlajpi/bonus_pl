@@ -1,0 +1,118 @@
+{% extends "base.html" %}
+{% load pa_bonus_extras %}
+{% block title %}My Clients{% endblock %}
+
+{% block content %}
+<div class="dashboard-container">
+  <h2>My Clients</h2>
+
+  <!-- Filters -->
+  <div class="filter-bar">
+    <form method="get">
+      <div class="filter-row">
+        {% if regions|length > 1 %}
+        <div class="filter-group">
+          <label for="region">Region</label>
+          <select name="region" id="region">
+            <option value="all">All Regions</option>
+            {% for region in regions %}
+              <option value="{{ region.id }}" {% if selected_region == region.id|slugify %}selected{% endif %}>
+                {{ region.name }}
+              </option>
+            {% endfor %}
+          </select>
+        </div>
+        {% endif %}
+
+        <div class="filter-group">
+          <label for="month_from">From</label>
+          <select name="month_from" id="month_from">
+            {% for num, name in months %}
+              <option value="{{ num }}" {% if month_from == num %}selected{% endif %}>{{ name }}</option>
+            {% endfor %}
+          </select>
+        </div>
+        <div class="filter-group">
+          <label for="year_from">Year</label>
+          <select name="year_from" id="year_from">
+            {% year_range 2024 2030 as years %}
+            {% for y in years %}
+              <option value="{{ y }}" {% if year_from == y %}selected{% endif %}>{{ y }}</option>
+            {% endfor %}
+          </select>
+        </div>
+
+        <div class="filter-group">
+          <label for="month_to">To</label>
+          <select name="month_to" id="month_to">
+            {% for num, name in months %}
+              <option value="{{ num }}" {% if month_to == num %}selected{% endif %}>{{ name }}</option>
+            {% endfor %}
+          </select>
+        </div>
+        <div class="filter-group">
+          <label for="year_to">Year</label>
+          <select name="year_to" id="year_to">
+            {% year_range 2024 2030 as years %}
+            {% for y in years %}
+              <option value="{{ y }}" {% if year_to == y %}selected{% endif %}>{{ y }}</option>
+            {% endfor %}
+          </select>
+        </div>
+
+        <div class="filter-group">
+          <button type="submit" class="btn-filter">Filter</button>
+          <a href="{% url 'salesrep_clients' %}" class="btn-reset">Reset</a>
+        </div>
+      </div>
+    </form>
+  </div>
+
+  <p>Showing {{ clients|length }} clients for period {{ date_from|date:"d.m.Y" }} – {{ date_to|date:"d.m.Y" }}.</p>
+
+  <!-- Client Table -->
+  <div class="table-container">
+    <table class="transactions-table">
+      <thead>
+        <tr>
+          <th>Client</th>
+          <th>Customer Number</th>
+          <th>Region</th>
+          <th>Contract</th>
+          <th>Turnover (Period)</th>
+          <th>Points (Period)</th>
+          <th>Available Balance</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for row in clients %}
+        <tr>
+          <td>{{ row.user.first_name }} {{ row.user.last_name }}</td>
+          <td>{{ row.user.user_number }}</td>
+          <td>{{ row.user.region.name|default:"—" }}</td>
+          <td>
+            {% if row.contract %}
+              <span class="status-badge confirmed">Active</span>
+            {% else %}
+              <span class="status-badge cancelled">None</span>
+            {% endif %}
+          </td>
+          <td>{{ row.turnover|floatformat:0 }} PLN</td>
+          <td class="value positive">{{ row.user.confirmed_points }}</td>
+          <td class="value">{{ row.user.available_points }}</td>
+          <td>
+            <a href="{% url 'salesrep_client_detail' row.user.pk %}" class="details-link">Detail</a>
+            <a href="{% url 'salesrep_create_reward_request' row.user.pk %}" class="details-link">Request</a>
+          </td>
+        </tr>
+        {% empty %}
+        <tr>
+          <td colspan="8">No clients found.</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}

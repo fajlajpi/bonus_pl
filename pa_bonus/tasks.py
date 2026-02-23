@@ -359,8 +359,8 @@ def process_brand_points(user, invoice, turnover, brand_bonuses, filetype):
     if not bonus:
         return 0
     
-    # Calculate points based on the bonus ratio
-    points = int(float(amount) * bonus.points_ratio)
+    # Calculate points : 1 point per 500 PLN of turnover, rounded DOWN
+    points = int(float(amount) // 500)
     
     if points == 0:
         return 0

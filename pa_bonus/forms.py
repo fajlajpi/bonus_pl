@@ -305,9 +305,8 @@ class ClientCreationForm(forms.Form):
                         )
                         continue
                     
-                    # Calculate points based on brand bonus ratio
-                    # Convert points_ratio to Decimal to avoid type mismatch
-                    points = int(turnover.amount * Decimal(str(brand_bonus.points_ratio)))
+                    # Calculate points: 1 point per 500 PLN of turnover, rounded down
+                    points = int(float(turnover.amount) // 500)
                     
                     # Determine transaction type and status based on invoice type
                     # Match the existing system's logic from tasks.py

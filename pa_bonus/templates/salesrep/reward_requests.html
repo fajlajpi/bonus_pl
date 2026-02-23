@@ -1,0 +1,78 @@
+{% extends "base.html" %}
+{% block title %}Reward Requests — Sales Rep{% endblock %}
+
+{% block content %}
+<div class="dashboard-container">
+  <h2>Reward Requests (My Regions)</h2>
+
+  <!-- Status Filter -->
+  <div class="filter-bar">
+    <form method="get">
+      <div class="filter-row">
+        <div class="filter-group">
+          <label for="status">Filter by Status</label>
+          <select name="status" id="status">
+            <option value="">All</option>
+            <option value="DRAFT" {% if selected_status == 'DRAFT' %}selected{% endif %}>Draft</option>
+            <option value="PENDING" {% if selected_status == 'PENDING' %}selected{% endif %}>Pending</option>
+            <option value="ACCEPTED" {% if selected_status == 'ACCEPTED' %}selected{% endif %}>Accepted</option>
+            <option value="REJECTED" {% if selected_status == 'REJECTED' %}selected{% endif %}>Rejected</option>
+            <option value="FINISHED" {% if selected_status == 'FINISHED' %}selected{% endif %}>Finished</option>
+            <option value="CANCELLED" {% if selected_status == 'CANCELLED' %}selected{% endif %}>Cancelled</option>
+          </select>
+        </div>
+        <div class="filter-group">
+          <button type="submit" class="btn-filter">Filter</button>
+          <a href="{% url 'salesrep_reward_requests' %}" class="btn-reset">Reset</a>
+        </div>
+      </div>
+    </form>
+  </div>
+
+  <!-- Requests Table -->
+  <div class="table-container">
+    <table class="transactions-table">
+      <thead>
+        <tr>
+          <th>ID</th>
+          <th>Client</th>
+          <th>Customer Number</th>
+          <th>Region</th>
+          <th>Status</th>
+          <th>Total Points</th>
+          <th>Requested</th>
+          <th>Note</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for req in reward_requests %}
+        <tr>
+          <td>{{ req.id }}</td>
+          <td>{{ req.user.first_name }} {{ req.user.last_name }}</td>
+          <td>{{ req.user.user_number }}</td>
+          <td>{{ req.user.region.name|default:"—" }}</td>
+          <td>
+            <span class="status-badge {{ req.status|lower }}">{{ req.get_status_display }}</span>
+          </td>
+          <td class="value negative">{{ req.total_points }} pts</td>
+          <td>{{ req.requested_at|date:"d.m.Y" }}</td>
+          <td>
+            {% if req.note %}
+              <span class="note-indicator" title="{{ req.note|truncatechars:50 }}">✓</span>
+            {% endif %}
+          </td>
+          <td>
+            <a href="{% url 'salesrep_client_detail' req.user.pk %}" class="details-link">View Client</a>
+          </td>
+        </tr>
+        {% empty %}
+        <tr>
+          <td colspan="9">No reward requests found.</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}
