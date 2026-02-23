@@ -2,7 +2,6 @@ from django.db import models
 from django.db.models import Sum
 from django.contrib.auth.models import AbstractUser, Group, Permission
 from django.contrib.contenttypes.models import ContentType
-from dateutil.relativedelta import relativedelta
 import os
 import logging
 
@@ -212,8 +211,6 @@ class UserContract(models.Model):
         user_id (User): The User object the UserContract belongs to.
         contract_date_from (DateField): The start date of the contract.
         contract_date_to (DateField): The end date of the contract.
-        extra_goal_12m (int): The target turnover over 12 months. Reaching it gives extra points.
-        extra_goal_base (int): The base that the extra goal increase is counted from.
         is_active (bool): Whether the contract is active or not.
         brandbonuses (BrandBonus): Each contract has one or more BrandBonuses relating to it which determine ho to add points
     """
@@ -230,123 +227,6 @@ class UserContract(models.Model):
         user_name = self.user_id.last_name + ' ' + self.user_id.first_name
 
         return user_name + f' ({self.contract_date_from})'
-
-class UserContractGoal(models.Model):
-    """
-    Represents a performance goal set within a user's contract for specific brands over a period.
-    
-    Now supports flexible evaluation periods and milestone-based assessments.
-    """
-    user_contract = models.ForeignKey(UserContract, on_delete=models.CASCADE, related_name='extra_goals')
-    brands = models.ManyToManyField(Brand)
-    goal_period_from = models.DateField()
-    goal_period_to = models.DateField()
-    goal_value = models.IntegerField()  # Target turnover for the entire period
-    goal_base = models.IntegerField()   # Historical baseline for the same period length
-    
-    # New fields for flexible evaluation
-    evaluation_frequency = models.IntegerField(
-        default=6,
-        help_text="How often to evaluate progress (in months)"
-    )
-    allow_full_period_recovery = models.BooleanField(
-        default=True,
-        help_text="If True, missing early milestones can be recovered if full period goal is met"
-    )
-    bonus_percentage = models.FloatField(
-        default=0.5,
-        help_text="Percentage of exceeded amount to award as points (0.5 = 50%)"
-    )
-    
-    class Meta:
-        ordering = ['-goal_period_from']
-    
-    def __str__(self):
-        return f"Goal for {self.user_contract} | {self.goal_value} from {self.goal_period_from} to {self.goal_period_to}"
-    
-    def get_evaluation_periods(self):
-        """
-        Returns a list of evaluation periods based on the frequency.
-        Each period is a tuple of (start_date, end_date, is_final)
-        """
-        periods = []
-        current_start = self.goal_period_from
-        
-        while current_start < self.goal_period_to:
-            # Calculate the end of this evaluation period
-            period_end = current_start + relativedelta(months=self.evaluation_frequency)
-            
-            # Don't exceed the goal end date
-            if period_end > self.goal_period_to:
-                period_end = self.goal_period_to
-            
-            # Check if this is the final period
-            is_final = period_end == self.goal_period_to
-            
-            periods.append((current_start, period_end, is_final))
-            current_start = period_end
-        
-        return periods
-    
-    def get_period_targets(self, start_date, end_date):
-        """
-        Calculate proportional targets for a specific evaluation period.
-        """
-        # Calculate the proportion of the total period this represents
-        total_days = (self.goal_period_to - self.goal_period_from).days
-        period_days = (end_date - start_date).days
-        proportion = period_days / total_days
-        
-        return {
-            'goal_value': int(self.goal_value * proportion),
-            'goal_base': int(self.goal_base * proportion)
-        }
-
-
-class GoalEvaluation(models.Model):
-    """
-    Tracks evaluations of UserContractGoal at specific milestones.
-    """
-    goal = models.ForeignKey(UserContractGoal, on_delete=models.CASCADE, related_name='evaluations')
-    evaluation_date = models.DateField()
-    period_start = models.DateField()
-    period_end = models.DateField()
-    
-    # Turnover data
-    actual_turnover = models.DecimalField(max_digits=12, decimal_places=2)
-    target_turnover = models.DecimalField(max_digits=12, decimal_places=2)
-    baseline_turnover = models.DecimalField(max_digits=12, decimal_places=2)
-    
-    # Evaluation results
-    is_achieved = models.BooleanField(default=False)
-    bonus_points = models.IntegerField(default=0)
-    evaluation_type = models.CharField(
-        max_length=20,
-        choices=[
-            ('MILESTONE', 'Milestone Evaluation'),
-            ('RECOVERY', 'Full Period Recovery'),
-            ('FINAL', 'Final Evaluation')
-        ]
-    )
-    
-    # Transaction reference
-    points_transaction = models.OneToOneField(
-        'PointsTransaction', 
-        null=True, 
-        blank=True, 
-        on_delete=models.SET_NULL
-    )
-    
-    created_at = models.DateTimeField(auto_now_add=True)
-    evaluated_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True)
-    
-    class Meta:
-        unique_together = ['goal', 'period_end']
-        ordering = ['-evaluation_date']
-    
-    def __str__(self):
-        return f"Evaluation for {self.goal} on {self.evaluation_date}"
-
 
 class PointsTransaction(models.Model):
     """
@@ -375,7 +255,6 @@ class PointsTransaction(models.Model):
         ('STANDARD_POINTS', 'Standard Points added'),
         ('REWARD_CLAIM', 'Reward Claim'),
         ('CREDIT_NOTE_ADJUST', 'Credit Note (dobropis) adjustment'),
-        ('EXTRA_POINTS', 'Extra Points added'),
         ('ADJUSTMENT', 'Manual Adjustment'),
     )
     TRANSACTION_STATUS = (

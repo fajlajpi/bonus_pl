@@ -138,60 +138,7 @@
           </dd>
         </dl>
       </div>
-      
-      {% if active_contract.extra_goals.all %}
-        <div class="info-card">
-          <h4>Extra Goals</h4>
-          <ul class="goal-list">
-            {% for goal in active_contract.extra_goals.all %}
-              <li>
-                <strong>{{ goal.goal_period_from|date:"m.Y" }} - {{ goal.goal_period_to|date:"m.Y" }}</strong>: 
-                Goal: {{ goal.goal_value }} CZK, Base: {{ goal.goal_base }} CZK
-              </li>
-            {% endfor %}
-          </ul>
-        </div>
-      {% endif %}
-    {% else %}
-      <p>No active contract found for this client.</p>
     {% endif %}
-    
-    {% if all_contracts.count > 1 %}
-      <div class="collapsible-section">
-        <h4 class="collapsible-header">Contract History <span class="toggle-indicator">+</span></h4>
-        <div class="collapsible-content hidden">
-          <table class="transactions-table">
-            <thead>
-              <tr>
-                <th>Period</th>
-                <th>Status</th>
-                <th>Brands</th>
-              </tr>
-            </thead>
-            <tbody>
-              {% for contract in all_contracts %}
-                {% if not contract.is_active or all_contracts.count > 1 %}
-                  <tr>
-                    <td>{{ contract.contract_date_from|date:"d.m.Y" }} - {{ contract.contract_date_to|date:"d.m.Y" }}</td>
-                    <td>{% if contract.is_active %}Active{% else %}Inactive{% endif %}</td>
-                    <td>
-                      <ul class="inline-list">
-                        {% for brand_bonus in contract.brandbonuses.all %}
-                          <li>{{ brand_bonus.brand_id.name }}</li>
-                        {% empty %}
-                          <li>None</li>
-                        {% endfor %}
-                      </ul>
-                    </td>
-                  </tr>
-                {% endif %}
-              {% endfor %}
-            </tbody>
-          </table>
-        </div>
-      </div>
-    {% endif %}
-  </div>
   
   <!-- Turnover Information -->
   <div class="dashboard-section">

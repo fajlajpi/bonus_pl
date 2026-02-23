@@ -8,25 +8,14 @@ from import_export.widgets import DateWidget
 from import_export.admin import ExportMixin, ImportExportMixin
 from django.forms.models import BaseInlineFormSet
 from pa_bonus.models import (
-    User, Brand, UserContract, UserContractGoal, PointsTransaction, BrandBonus, 
+    User, Brand, UserContract, PointsTransaction, BrandBonus, 
     FileUpload, Reward, RewardRequest, RewardRequestItem, EmailNotification, Invoice, InvoiceBrandTurnover,
-    Region, RegionRep, UserActivity, GoalEvaluation, 
+    Region, RegionRep, UserActivity, 
 )
-from .resources import UserResource, UserContractResource, UserContractGoalResource, RewardResource, OptimizedUserResource
+from .resources import UserResource, UserContractResource, RewardResource, OptimizedUserResource
 
 
 logger = logging.getLogger(__name__)
-
-# INLINE FORMS
-class UserContractGoalInlineForm(forms.ModelForm):
-    class Meta:
-        model = UserContractGoal
-        fields = '__all__'
-        widgets = {
-            'goal_period_from': AdminDateWidget(),
-            'goal_period_to': AdminDateWidget(),
-            'brands': FilteredSelectMultiple("Brands", is_stacked=False),
-        }
 
 # INLINES
 class RewardRequestItemInline(admin.TabularInline):
@@ -44,12 +33,6 @@ class UserContractInline(admin.TabularInline):
     model = UserContract
     extra = 0  # Number of empty forms shown
     formset = UserContractInlineFormSet
-
-class UserContractGoalInline(admin.TabularInline):
-    model = UserContractGoal
-    fk_name = "user_contract"
-    form = UserContractGoalInlineForm
-    extra = 0
 
 class InvoiceBrandTurnoverInline(admin.TabularInline):
     model = InvoiceBrandTurnover
@@ -166,20 +149,6 @@ class UserContractAdmin(ImportExportMixin, admin.ModelAdmin):
     list_display = ('user_id', 'contract_date_from', 'contract_date_to', 'is_active')
     search_fields = ('user_id__username', 'user_id__email', 'user_id__user_number')
     list_filter = ('is_active', 'contract_date_from', 'contract_date_to')
-    inlines = [UserContractGoalInline]
-
-@admin.register(UserContractGoal)
-class UserContractGoalAdmin(ImportExportMixin, admin.ModelAdmin):
-    resource_class = UserContractGoalResource
-    list_display = ('user_contract', 'goal_period_from', 'goal_period_to', 'goal_value', 'goal_base', 'evaluation_frequency', 'allow_full_period_recovery', 'bonus_percentage')
-    list_filter = ('goal_period_from', 'goal_period_to')
-    search_fields = ('user_contract__user_id__email',)
-
-@admin.register(GoalEvaluation)
-class GoalEvaluationAdmin(admin.ModelAdmin):
-    list_display = ('goal', 'evaluation_date', 'period_start', 'period_end', 'actual_turnover', 'target_turnover', 'baseline_turnover', 'is_achieved', 'bonus_points', 'evaluation_type')
-    list_filter = ('evaluation_date', 'is_achieved', 'evaluation_type')
-    search_fields = ('goal__user_contract__user_id__username', 'goal__user_contract__user_id__email')
 
 @admin.register(PointsTransaction)
 class PointsTransactionAdmin(ExportMixin, admin.ModelAdmin):

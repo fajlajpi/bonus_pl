@@ -25,54 +25,12 @@
     <p>Bez aktivních členství.</p>
     {% endif %}
 
-    {% if active_goal %}
-    <div class="dashboard-section goal-summary-widget contract-details">
-        <h3>Aktuální cílový bonus</h3>
-        <div class="goal-period-info">
-            <p>Období: {{ active_goal.period_start|date:"d.m.Y" }} - {{ active_goal.period_end|date:"d.m.Y" }}</p>
-        </div>
-        
-        <div class="goal-progress-summary">
-            <div class="progress-info">
-                <div class="progress-row">
-                    <span>Cíl období:</span>
-                    <strong>{{ active_goal.target|floatformat:0 }} Kč</strong>
-                </div>
-                <div class="progress-row">
-                    <span>Aktuální obrat:</span>
-                    <strong>{{ active_goal.actual|floatformat:0 }} Kč</strong>
-                </div>
-                <div class="progress-row">
-                    <span>Zbývá do cíle:</span>
-                    <strong>{{ active_goal.remaining|floatformat:0 }} Kč</strong>
-                </div>
-            </div>
-            
-            <div class="summary-item">
-                <div class="progress-bar-container">
-                    <div class="progress-bar" style="width: {{ active_goal.progress|floatformat:0 }}%">
-                        <span class="progress-text">{{ active_goal.progress|floatformat:0 }}%</span>
-                    </div>
-                </div>
-            </div>
-        </div>
-        
-        <div class="goal-action">
-            <a href="{% url 'extra_goals_detail' %}" class="details-link">
-                Zobrazit všechny cíle
-            </a>
-        </div>
-    </div>
-    {% endif %}
-
-
     <div class="quick-links">
         <h3>Rychlé odkazy</h3>
         <ul>
             <li><a href="{% url 'history' %}">Historie bodových transakcí</a></li>
             <li><a href="{% url 'rewards' %}">Nabídka odměn</a></li>
             <li><a href="{% url 'reward_requests' %}">Žádosti o čerpání odměn</a></li>
-            <li><a href="{% url 'extra_goals_detail' %}">Extra cíle</a></li>
         </ul>
     </div>
 </div>

@@ -10,7 +10,7 @@ import tablib
 import logging
 from datetime import datetime
 from django.core.exceptions import ValidationError
-from .models import Reward, Brand, User, UserContract, UserContractGoal, Region, BrandBonus
+from .models import Reward, Brand, User, UserContract, Region, BrandBonus
 
 logger = logging.getLogger(__name__)
 
@@ -237,77 +237,6 @@ class UserContractResource(resources.ModelResource):
                 # Find matching BrandBonus objects
                 bonuses = BrandBonus.objects.filter(name__in=bonus_names_list)
                 instance.brandbonuses.set(bonuses)  # Assign ManyToMany relation
-
-class UserContractGoalResource(resources.ModelResource):
-    user_email = fields.Field(
-        column_name='user_email',
-        readonly=True
-    )
-
-    contract_date_from = fields.Field(
-        column_name='contract_date_from',
-        readonly=True
-    )
-
-    user_contract = fields.Field(
-        column_name='user_contract',
-        attribute='user_contract',
-        widget=widgets.ForeignKeyWidget(UserContract, field='id')
-    )
-
-    brands = fields.Field(
-        column_name='brands',
-        attribute='brands',
-        widget=widgets.ManyToManyWidget(Brand, field='name', separator=',')
-    )
-
-    class Meta:
-        model = UserContractGoal
-        import_id_fields = []  # No natural unique constraint
-        fields = (
-            'user_email',
-            'contract_date_from',
-            'user_contract',
-            'goal_period_from',
-            'goal_period_to',
-            'goal_value',
-            'goal_base',
-            'evaluation_frequency',
-            'allow_full_period_recovery',
-            'bonus_percentage',
-            'brands',
-        )
-        export_order = fields
-
-    def before_import_row(self, row, **kwargs):
-        email = row.get('user_email')
-        contract_start = row.get('contract_date_from')
-
-        if not email or not contract_start:
-            raise ValidationError("Missing user_email or contract_date_from.")
-
-        # Parse contract_start safely
-        try:
-            if isinstance(contract_start, str):
-                contract_start = contract_start.strip()
-                if 'T' in contract_start or 'Z' in contract_start:
-                    contract_start = datetime.fromisoformat(contract_start.replace('Z', '+00:00')).date()
-                else:
-                    contract_start = datetime.strptime(contract_start, "%Y-%m-%d").date()
-        except Exception:
-            raise ValidationError(f"Invalid date format for contract_date_from: {contract_start}")
-
-        # Find and set user_contract ID
-        try:
-            contract = UserContract.objects.get(user_id__email=email, contract_date_from=contract_start)
-            row['user_contract'] = contract.id
-        except UserContract.DoesNotExist:
-            raise ValidationError(f"UserContract not found for {email} starting {contract_start}")
-        except UserContract.MultipleObjectsReturned:
-            raise ValidationError(f"Multiple contracts found for {email} on {contract_start}")
-
-    def skip_row(self, instance, original, row, import_validation_errors=None):
-        return not row.get('user_contract')  # skip if lookup failed
 
 class RewardResource(resources.ModelResource):
     """

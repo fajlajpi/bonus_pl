@@ -94,7 +94,7 @@ AUTH_USER_MODEL = 'pa_bonus.User'
 # Internationalization
 # https://docs.djangoproject.com/en/5.1/topics/i18n/
 
-LANGUAGE_CODE = 'cs'
+LANGUAGE_CODE = 'en'
 
 TIME_ZONE = 'UTC'
 

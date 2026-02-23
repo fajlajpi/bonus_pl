@@ -99,28 +99,6 @@
         </a>
       </div>
     </div>
-    
-    {% if goal_stats.pending_evaluations > 0 %}
-    <div class="dashboard-section">
-        <h3>Cílové bonusy k vyhodnocení</h3>
-        <div class="stats-summary">
-            <div class="stat-item">
-                <span class="stat-value">{{ goal_stats.pending_evaluations }}</span>
-                <span class="stat-label">Období k vyhodnocení</span>
-            </div>
-            <div class="stat-item">
-                <span class="stat-value">{{ goal_stats.potential_points }}</span>
-                <span class="stat-label">Potenciální body</span>
-            </div>
-        </div>
-        <div class="dashboard-actions">
-            <a href="{% url 'goal_evaluation' %}" class="dashboard-button">
-                <span class="button-icon">🎯</span>
-                <span class="button-text">Vyhodnotit cíle</span>
-            </a>
-        </div>
-    </div>
-    {% endif %}
 
     <!-- SMS Section -->
     <div class="dashboard-section">

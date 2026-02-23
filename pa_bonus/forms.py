@@ -7,7 +7,7 @@ from django.utils.translation import gettext_lazy as _
 from django.contrib.auth.hashers import make_password
 from django.core.exceptions import ValidationError
 from pa_bonus.models import (
-    User, UserContract, UserContractGoal, Brand, BrandBonus, Region,
+    User, UserContract, Brand, BrandBonus, Region,
     Invoice, InvoiceBrandTurnover, PointsTransaction
 )
 import datetime
@@ -146,75 +146,6 @@ class ClientCreationForm(forms.Form):
         required=False,
         help_text='Select applicable brand bonus schemes for this contract',
         widget=forms.SelectMultiple(attrs={'class': 'form-control', 'size': '5'})
-    )
-    
-    # ========== GOAL FIELDS (OPTIONAL) ==========
-    create_goal = forms.BooleanField(
-        initial=False,
-        required=False,
-        label='Create Contract Goal',
-        help_text='Check to add an initial contract goal',
-        widget=forms.CheckboxInput(attrs={'class': 'form-check-input', 'id': 'id_create_goal'})
-    )
-    
-    goal_brands = forms.ModelMultipleChoiceField(
-        queryset=Brand.objects.all(),
-        label='Goal Brands',
-        required=False,
-        help_text='Brands included in this goal',
-        widget=forms.SelectMultiple(attrs={'class': 'form-control', 'size': '5'})
-    )
-    
-    goal_period_from = forms.DateField(
-        label='Goal Period Start',
-        required=False,
-        help_text='Start date for this goal period',
-        widget=forms.DateInput(attrs={'class': 'form-control', 'type': 'date'})
-    )
-    
-    goal_period_to = forms.DateField(
-        label='Goal Period End',
-        required=False,
-        help_text='End date for this goal period',
-        widget=forms.DateInput(attrs={'class': 'form-control', 'type': 'date'})
-    )
-    
-    goal_value = forms.IntegerField(
-        label='Target Turnover',
-        required=False,
-        help_text='Target turnover for the entire period',
-        widget=forms.NumberInput(attrs={'class': 'form-control', 'min': '0'})
-    )
-    
-    goal_base = forms.IntegerField(
-        label='Baseline Turnover',
-        required=False,
-        help_text='Historical baseline for comparison',
-        widget=forms.NumberInput(attrs={'class': 'form-control', 'min': '0'})
-    )
-    
-    evaluation_frequency = forms.IntegerField(
-        initial=6,
-        label='Evaluation Frequency (months)',
-        required=False,
-        help_text='How often to evaluate progress in months',
-        widget=forms.NumberInput(attrs={'class': 'form-control', 'min': '1', 'max': '12'})
-    )
-    
-    allow_full_period_recovery = forms.BooleanField(
-        initial=True,
-        required=False,
-        label='Allow Full Period Recovery',
-        help_text='Missing early milestones can be recovered if full period goal is met',
-        widget=forms.CheckboxInput(attrs={'class': 'form-check-input'})
-    )
-    
-    bonus_percentage = forms.FloatField(
-        initial=0.5,
-        label='Bonus Percentage',
-        required=False,
-        help_text='Percentage of exceeded amount to award as points (0.5 = 50%)',
-        widget=forms.NumberInput(attrs={'class': 'form-control', 'min': '0', 'max': '1', 'step': '0.01'})
     )
     
     # ========== RETROACTIVE TRANSACTION PROCESSING ==========
@@ -433,7 +364,7 @@ class ClientCreationForm(forms.Form):
     
     def save(self):
         """
-        Create User, UserContract, UserContractGoal, and optionally process
+        Create User, UserContract, and optionally process
         historical transactions.
         
         Returns:
@@ -464,22 +395,6 @@ class ClientCreationForm(forms.Form):
             # Add brand bonuses to contract
             if self.cleaned_data.get('brand_bonuses'):
                 contract.brandbonuses.set(self.cleaned_data['brand_bonuses'])
-            
-            # Create UserContractGoal if requested
-            if self.cleaned_data.get('create_goal'):
-                goal = UserContractGoal.objects.create(
-                    user_contract=contract,
-                    goal_period_from=self.cleaned_data['goal_period_from'],
-                    goal_period_to=self.cleaned_data['goal_period_to'],
-                    goal_value=self.cleaned_data['goal_value'],
-                    goal_base=self.cleaned_data['goal_base'],
-                    evaluation_frequency=self.cleaned_data.get('evaluation_frequency', 6),
-                    allow_full_period_recovery=self.cleaned_data.get('allow_full_period_recovery', True),
-                    bonus_percentage=self.cleaned_data.get('bonus_percentage', 0.5)
-                )
-                
-                if self.cleaned_data.get('goal_brands'):
-                    goal.brands.set(self.cleaned_data['goal_brands'])
             
             # Process historical transactions if requested
             transaction_stats = None

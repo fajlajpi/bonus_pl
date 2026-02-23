@@ -47,8 +47,6 @@ urlpatterns.extend([
     path('rewards/', vu.RewardsView.as_view(), name='rewards'),
     path('rewards/requests/', vu.RewardsRequestsView.as_view(), name='reward_requests'),
     path('rewards/requests/detail/<int:pk>', vu.RewardsRequestConfirmationView.as_view(), name='rewards_request_detail'), 
-    path('extra-goals/', vu.ExtraGoalsView.as_view(), name='extra_goals'),
-    path('extra-goals/detail/', vu.ExtraGoalsDetailView.as_view(), name='extra_goals_detail'),
 ])
 
 # MANAGER FACING URLS
@@ -66,8 +64,6 @@ urlpatterns.extend([
     path('manager/clients/<int:pk>/', vm.ClientDetailView.as_view(), name='manager_client_detail'),
     path('manager/upload_stock/', vm.upload_stock, name='upload_stock'),
     path('manager/user-activity/', vm.UserActivityDashboardView.as_view(), name='user_activity_dashboard'),
-    path('manager/goals/evaluate/', vm.GoalEvaluationView.as_view(), name='goal_evaluation'),
-    path('manager/goals/overview/', vm.GoalsOverviewView.as_view(), name='goals_overview'),
     # Enhanced Reward Request Management
     path('manager/reward-requests-enhanced/', 
          vm.EnhancedRewardRequestListView.as_view(), 
