@@ -1,0 +1,347 @@
+{% extends "base.html" %}
+{% block title %}Add New Client{% endblock %}
+
+{% block content %}
+<div class="dashboard-container">
+  <div class="page-header">
+    <h2>Add New Client</h2>
+    <p class="page-description">Create a new client with contract and optional goals in a single form.</p>
+  </div>
+
+  <form method="post" class="client-form">
+    {% csrf_token %}
+    
+    {% if form.non_field_errors %}
+    <div class="alert alert-error">
+      {{ form.non_field_errors }}
+    </div>
+    {% endif %}
+
+    <!-- User Information Section -->
+    <div class="form-section">
+      <h3 class="section-title">Client Information</h3>
+      <p class="section-description">Basic information about the client. The customer number will be used as the default password.</p>
+      
+      <div class="form-row">
+        <div class="form-group">
+          <label for="{{ form.username.id_for_label }}">{{ form.username.label }} *</label>
+          {{ form.username }}
+          {% if form.username.help_text %}
+          <small class="form-text">{{ form.username.help_text }}</small>
+          {% endif %}
+          {% if form.username.errors %}
+          <div class="field-error">{{ form.username.errors }}</div>
+          {% endif %}
+        </div>
+
+        <div class="form-group">
+          <label for="{{ form.email.id_for_label }}">{{ form.email.label }} *</label>
+          {{ form.email }}
+          {% if form.email.help_text %}
+          <small class="form-text">{{ form.email.help_text }}</small>
+          {% endif %}
+          {% if form.email.errors %}
+          <div class="field-error">{{ form.email.errors }}</div>
+          {% endif %}
+        </div>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label for="{{ form.first_name.id_for_label }}">{{ form.first_name.label }}</label>
+          {{ form.first_name }}
+          {% if form.first_name.errors %}
+          <div class="field-error">{{ form.first_name.errors }}</div>
+          {% endif %}
+        </div>
+
+        <div class="form-group">
+          <label for="{{ form.last_name.id_for_label }}">{{ form.last_name.label }}</label>
+          {{ form.last_name }}
+          {% if form.last_name.errors %}
+          <div class="field-error">{{ form.last_name.errors }}</div>
+          {% endif %}
+        </div>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label for="{{ form.user_number.id_for_label }}">{{ form.user_number.label }} *</label>
+          {{ form.user_number }}
+          {% if form.user_number.help_text %}
+          <small class="form-text">{{ form.user_number.help_text }}</small>
+          {% endif %}
+          {% if form.user_number.errors %}
+          <div class="field-error">{{ form.user_number.errors }}</div>
+          {% endif %}
+        </div>
+
+        <div class="form-group">
+          <label for="{{ form.user_phone.id_for_label }}">{{ form.user_phone.label }}</label>
+          {{ form.user_phone }}
+          {% if form.user_phone.errors %}
+          <div class="field-error">{{ form.user_phone.errors }}</div>
+          {% endif %}
+        </div>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label for="{{ form.region.id_for_label }}">{{ form.region.label }}</label>
+          {{ form.region }}
+          {% if form.region.errors %}
+          <div class="field-error">{{ form.region.errors }}</div>
+          {% endif %}
+        </div>
+
+        <div class="form-group">
+          <div class="form-check">
+            {{ form.is_active }}
+            <label for="{{ form.is_active.id_for_label }}" class="form-check-label">
+              {{ form.is_active.label }}
+            </label>
+          </div>
+          {% if form.is_active.help_text %}
+          <small class="form-text">{{ form.is_active.help_text }}</small>
+          {% endif %}
+          {% if form.is_active.errors %}
+          <div class="field-error">{{ form.is_active.errors }}</div>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+
+    <!-- Contract Information Section -->
+    <div class="form-section">
+      <h3 class="section-title">Contract Information</h3>
+      <p class="section-description">Contract period and applicable brand bonus schemes.</p>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label for="{{ form.contract_date_from.id_for_label }}">{{ form.contract_date_from.label }} *</label>
+          {{ form.contract_date_from }}
+          {% if form.contract_date_from.help_text %}
+          <small class="form-text">{{ form.contract_date_from.help_text }}</small>
+          {% endif %}
+          {% if form.contract_date_from.errors %}
+          <div class="field-error">{{ form.contract_date_from.errors }}</div>
+          {% endif %}
+        </div>
+
+        <div class="form-group">
+          <label for="{{ form.contract_date_to.id_for_label }}">{{ form.contract_date_to.label }} *</label>
+          {{ form.contract_date_to }}
+          {% if form.contract_date_to.help_text %}
+          <small class="form-text">{{ form.contract_date_to.help_text }}</small>
+          {% endif %}
+          {% if form.contract_date_to.errors %}
+          <div class="field-error">{{ form.contract_date_to.errors }}</div>
+          {% endif %}
+        </div>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label for="{{ form.brand_bonuses.id_for_label }}">{{ form.brand_bonuses.label }}</label>
+          {{ form.brand_bonuses }}
+          {% if form.brand_bonuses.help_text %}
+          <small class="form-text">{{ form.brand_bonuses.help_text }}</small>
+          {% endif %}
+          {% if form.brand_bonuses.errors %}
+          <div class="field-error">{{ form.brand_bonuses.errors }}</div>
+          {% endif %}
+        </div>
+
+        <div class="form-group">
+          <div class="form-check">
+            {{ form.contract_is_active }}
+            <label for="{{ form.contract_is_active.id_for_label }}" class="form-check-label">
+              {{ form.contract_is_active.label }}
+            </label>
+          </div>
+          {% if form.contract_is_active.help_text %}
+          <small class="form-text">{{ form.contract_is_active.help_text }}</small>
+          {% endif %}
+          {% if form.contract_is_active.errors %}
+          <div class="field-error">{{ form.contract_is_active.errors }}</div>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+
+    <!-- Retroactive Transaction Processing Section -->
+    <div class="form-section highlight-section">
+      <h3 class="section-title">
+        <div class="form-check">
+          {{ form.process_historical_transactions }}
+          <label for="{{ form.process_historical_transactions.id_for_label }}" class="form-check-label">
+            {{ form.process_historical_transactions.label }}
+          </label>
+        </div>
+      </h3>
+      <p class="section-description">
+        <strong>Retroactive Client Addition:</strong> If this client has been doing business before 
+        joining the bonus program, check this box to automatically process their historical invoices. 
+        The system will search for existing invoices matching the customer number and create point 
+        transactions for all invoices within the contract period.
+      </p>
+      <div class="info-box">
+        <strong>How it works:</strong>
+        <ul>
+          <li>Searches for invoices matching the customer number in the database</li>
+          <li>Filters to invoices within the contract date range</li>
+          <li>Creates transactions using the selected brand bonuses</li>
+          <li>Skips any transactions that already exist (duplicate protection)</li>
+          <li>All transactions are created with PENDING status (as per standard workflow)</li>
+        </ul>
+      </div>
+    </div>
+
+    <!-- Goal Information Section (Optional) -->
+    <div class="form-section">
+      <h3 class="section-title">
+        <div class="form-check">
+          {{ form.create_goal }}
+          <label for="{{ form.create_goal.id_for_label }}" class="form-check-label">
+            {{ form.create_goal.label }}
+          </label>
+        </div>
+      </h3>
+      <p class="section-description">Optional: Add performance goals for this contract.</p>
+
+      <div id="goal-fields">
+        <div class="form-row">
+          <div class="form-group">
+            <label for="{{ form.goal_brands.id_for_label }}">{{ form.goal_brands.label }}</label>
+            {{ form.goal_brands }}
+            {% if form.goal_brands.help_text %}
+            <small class="form-text">{{ form.goal_brands.help_text }}</small>
+            {% endif %}
+            {% if form.goal_brands.errors %}
+            <div class="field-error">{{ form.goal_brands.errors }}</div>
+            {% endif %}
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label for="{{ form.goal_period_from.id_for_label }}">{{ form.goal_period_from.label }}</label>
+            {{ form.goal_period_from }}
+            {% if form.goal_period_from.help_text %}
+            <small class="form-text">{{ form.goal_period_from.help_text }}</small>
+            {% endif %}
+            {% if form.goal_period_from.errors %}
+            <div class="field-error">{{ form.goal_period_from.errors }}</div>
+            {% endif %}
+          </div>
+
+          <div class="form-group">
+            <label for="{{ form.goal_period_to.id_for_label }}">{{ form.goal_period_to.label }}</label>
+            {{ form.goal_period_to }}
+            {% if form.goal_period_to.help_text %}
+            <small class="form-text">{{ form.goal_period_to.help_text }}</small>
+            {% endif %}
+            {% if form.goal_period_to.errors %}
+            <div class="field-error">{{ form.goal_period_to.errors }}</div>
+            {% endif %}
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label for="{{ form.goal_value.id_for_label }}">{{ form.goal_value.label }}</label>
+            {{ form.goal_value }}
+            {% if form.goal_value.help_text %}
+            <small class="form-text">{{ form.goal_value.help_text }}</small>
+            {% endif %}
+            {% if form.goal_value.errors %}
+            <div class="field-error">{{ form.goal_value.errors }}</div>
+            {% endif %}
+          </div>
+
+          <div class="form-group">
+            <label for="{{ form.goal_base.id_for_label }}">{{ form.goal_base.label }}</label>
+            {{ form.goal_base }}
+            {% if form.goal_base.help_text %}
+            <small class="form-text">{{ form.goal_base.help_text }}</small>
+            {% endif %}
+            {% if form.goal_base.errors %}
+            <div class="field-error">{{ form.goal_base.errors }}</div>
+            {% endif %}
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label for="{{ form.evaluation_frequency.id_for_label }}">{{ form.evaluation_frequency.label }}</label>
+            {{ form.evaluation_frequency }}
+            {% if form.evaluation_frequency.help_text %}
+            <small class="form-text">{{ form.evaluation_frequency.help_text }}</small>
+            {% endif %}
+            {% if form.evaluation_frequency.errors %}
+            <div class="field-error">{{ form.evaluation_frequency.errors }}</div>
+            {% endif %}
+          </div>
+
+          <div class="form-group">
+            <label for="{{ form.bonus_percentage.id_for_label }}">{{ form.bonus_percentage.label }}</label>
+            {{ form.bonus_percentage }}
+            {% if form.bonus_percentage.help_text %}
+            <small class="form-text">{{ form.bonus_percentage.help_text }}</small>
+            {% endif %}
+            {% if form.bonus_percentage.errors %}
+            <div class="field-error">{{ form.bonus_percentage.errors }}</div>
+            {% endif %}
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <div class="form-check">
+              {{ form.allow_full_period_recovery }}
+              <label for="{{ form.allow_full_period_recovery.id_for_label }}" class="form-check-label">
+                {{ form.allow_full_period_recovery.label }}
+              </label>
+            </div>
+            {% if form.allow_full_period_recovery.help_text %}
+            <small class="form-text">{{ form.allow_full_period_recovery.help_text }}</small>
+            {% endif %}
+            {% if form.allow_full_period_recovery.errors %}
+            <div class="field-error">{{ form.allow_full_period_recovery.errors }}</div>
+            {% endif %}
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Form Actions -->
+    <div class="form-actions">
+      <button type="submit" class="btn btn-primary">Create Client</button>
+      <a href="{% url 'manager_clients' %}" class="btn btn-secondary">Cancel</a>
+    </div>
+  </form>
+</div>
+
+<script>
+// Toggle goal fields visibility based on checkbox
+document.addEventListener('DOMContentLoaded', function() {
+  const createGoalCheckbox = document.getElementById('id_create_goal');
+  const goalFields = document.getElementById('goal-fields');
+  
+  function toggleGoalFields() {
+    if (createGoalCheckbox.checked) {
+      goalFields.style.display = 'block';
+    } else {
+      goalFields.style.display = 'none';
+    }
+  }
+  
+  // Initial state
+  toggleGoalFields();
+  
+  // Add event listener
+  createGoalCheckbox.addEventListener('change', toggleGoalFields);
+});
+</script>
+
+{% endblock %}

@@ -1,0 +1,350 @@
+{% extends "base.html" %}
+{% load pa_bonus_extras %}
+{% block title %} Client Detail - {{ client.first_name }} {{ client.last_name }} {% endblock %}
+
+{% block content %}
+<div class="dashboard-container">
+  <div class="breadcrumbs">
+    <a href="{% url 'manager_clients' %}">← Back to Client List</a>
+  </div>
+
+  <h2>Client Detail: {{ client.first_name }} {{ client.last_name }}</h2>
+  
+  <!-- Client Information -->
+  <div class="dashboard-section">
+    <h3>Client Information</h3>
+    
+    <div class="client-info-grid">
+      <div class="info-card">
+        <h4>Contact Details</h4>
+        <dl class="info-list">
+          <dt>Name:</dt>
+          <dd>{{ client.first_name }} {{ client.last_name }}</dd>
+          
+          <dt>Client Number:</dt>
+          <dd>{{ client.user_number }}</dd>
+          
+          <dt>Email:</dt>
+          <dd>{{ client.email }}</dd>
+          
+          <dt>Phone:</dt>
+          <dd>{{ client.user_phone|default:"Not provided" }}</dd>
+          
+          <dt>Region:</dt>
+          <dd>{{ client.region.name|default:"Not assigned" }}</dd>
+        </dl>
+      </div>
+      
+      <div class="info-card">
+        <h4>Account Status</h4>
+        <dl class="info-list">
+          <dt>Username:</dt>
+          <dd>{{ client.username }}</dd>
+          
+          <dt>Account Active:</dt>
+          <dd>{% if client.is_active %}Yes{% else %}No{% endif %}</dd>
+          
+          <dt>Date Joined:</dt>
+          <dd>{{ client.date_joined|date:"d.m.Y" }}</dd>
+          
+          <dt>Available Points:</dt>
+          <dd class="value {% if point_totals.available < 0 %}negative{% else %}positive{% endif %}">
+            {{ point_totals.available }} points
+          </dd>
+        </dl>
+      </div>
+    </div>
+  </div>
+  
+  <!-- Filter Form -->
+  <div class="dashboard-section">
+    <h3>Filter Period</h3>
+    
+    <div class="form-group">
+        <label>Period From:</label>
+        <div class="date-inputs">
+          <select name="month_from" id="month_from">
+            {% for month_num, month_name in months %}
+              <option value="{{ month_num }}" {% if month_from == month_num %}selected{% endif %}>
+                {{ month_name }}
+              </option>
+            {% endfor %}
+          </select>
+          <select name="year_from" id="year_from">
+            {% with current_year|add:-5 as start_year %}
+            {% year_range start_year current_year as years %}
+            {% for year in years %}
+              <option value="{{ year }}" {% if year_from == year %}selected{% endif %}>
+                {{ year }}
+              </option>
+            {% endfor %}
+            {% endwith %}
+          </select>
+        </div>
+      </div>
+      
+      <div class="form-group">
+        <label>Period To:</label>
+        <div class="date-inputs">
+          <select name="month_to" id="month_to">
+            {% for month_num, month_name in months %}
+              <option value="{{ month_num }}" {% if month_to == month_num %}selected{% endif %}>
+                {{ month_name }}
+              </option>
+            {% endfor %}
+          </select>
+          <select name="year_to" id="year_to">
+            {% with current_year|add:-5 as start_year %}
+            {% year_range start_year current_year as years %}
+            {% for year in years %}
+              <option value="{{ year }}" {% if year_to == year %}selected{% endif %}>
+                {{ year }}
+              </option>
+            {% endfor %}
+            {% endwith %}
+          </select>
+        </div>
+      </div>
+      
+      <div class="form-actions">
+        <button type="submit" class="submit-button">Apply Filters</button>
+      </div>
+    </form>
+  </div>
+  
+  <!-- Contract Information -->
+  <div class="dashboard-section">
+    <h3>Contract Information</h3>
+    
+    {% if active_contract %}
+      <div class="info-card">
+        <h4>Active Contract</h4>
+        <dl class="info-list">
+          <dt>Date Range:</dt>
+          <dd>{{ active_contract.contract_date_from|date:"d.m.Y" }} - {{ active_contract.contract_date_to|date:"d.m.Y" }}</dd>
+          
+          <dt>Brand Bonuses:</dt>
+          <dd>
+            <ul class="brand-list">
+              {% for brand_bonus in active_contract.brandbonuses.all %}
+                <li>
+                  <strong>{{ brand_bonus.brand_id.name }}</strong>: 
+                  {{ brand_bonus.points_ratio }} points per CZK
+                </li>
+              {% empty %}
+                <li>No brand bonuses specified</li>
+              {% endfor %}
+            </ul>
+          </dd>
+        </dl>
+      </div>
+      
+      {% if active_contract.extra_goals.all %}
+        <div class="info-card">
+          <h4>Extra Goals</h4>
+          <ul class="goal-list">
+            {% for goal in active_contract.extra_goals.all %}
+              <li>
+                <strong>{{ goal.goal_period_from|date:"m.Y" }} - {{ goal.goal_period_to|date:"m.Y" }}</strong>: 
+                Goal: {{ goal.goal_value }} CZK, Base: {{ goal.goal_base }} CZK
+              </li>
+            {% endfor %}
+          </ul>
+        </div>
+      {% endif %}
+    {% else %}
+      <p>No active contract found for this client.</p>
+    {% endif %}
+    
+    {% if all_contracts.count > 1 %}
+      <div class="collapsible-section">
+        <h4 class="collapsible-header">Contract History <span class="toggle-indicator">+</span></h4>
+        <div class="collapsible-content hidden">
+          <table class="transactions-table">
+            <thead>
+              <tr>
+                <th>Period</th>
+                <th>Status</th>
+                <th>Brands</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for contract in all_contracts %}
+                {% if not contract.is_active or all_contracts.count > 1 %}
+                  <tr>
+                    <td>{{ contract.contract_date_from|date:"d.m.Y" }} - {{ contract.contract_date_to|date:"d.m.Y" }}</td>
+                    <td>{% if contract.is_active %}Active{% else %}Inactive{% endif %}</td>
+                    <td>
+                      <ul class="inline-list">
+                        {% for brand_bonus in contract.brandbonuses.all %}
+                          <li>{{ brand_bonus.brand_id.name }}</li>
+                        {% empty %}
+                          <li>None</li>
+                        {% endfor %}
+                      </ul>
+                    </td>
+                  </tr>
+                {% endif %}
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    {% endif %}
+  </div>
+  
+  <!-- Turnover Information -->
+  <div class="dashboard-section">
+    <h3>Brand Turnover ({{ date_from|date:"d.m.Y" }} - {{ date_to|date:"d.m.Y" }})</h3>
+    
+    <div class="table-container">
+      <table class="transactions-table">
+        <thead>
+          <tr>
+            <th>Brand</th>
+            <th>Invoice Turnover</th>
+            <th>Credit Notes</th>
+            <th>Net Turnover</th>
+            <th>Points</th>
+            <th>In Contract</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for brand_data in brand_turnovers %}
+            <tr class="{% if brand_data.in_contract %}contract-brand{% endif %}">
+              <td>{{ brand_data.brand.name }}</td>
+              <td>{{ brand_data.invoice_turnover|floatformat:2 }} CZK</td>
+              <td>{{ brand_data.credit_turnover|floatformat:2 }} CZK</td>
+              <td>{{ brand_data.net_turnover|floatformat:2 }} CZK</td>
+              <td class="value {% if brand_data.points < 0 %}negative{% else %}positive{% endif %}">
+                {{ brand_data.points }} pts
+              </td>
+              <td>
+                {% if brand_data.in_contract %}
+                  <span class="status-badge confirmed">Yes</span>
+                {% else %}
+                  <span class="status-badge pending">No</span>
+                {% endif %}
+              </td>
+            </tr>
+          {% empty %}
+            <tr>
+              <td colspan="6">No turnover data found for the selected period.</td>
+            </tr>
+          {% endfor %}
+          <!-- Summary row -->
+          {% if brand_turnovers %}
+            <tr class="summary-row">
+              <td><strong>TOTAL</strong></td>
+              <td>{{ brand_turnovers|sum_attr:"invoice_turnover"|floatformat:2 }} CZK</td>
+              <td>{{ brand_turnovers|sum_attr:"credit_turnover"|floatformat:2 }} CZK</td>
+              <td>{{ brand_turnovers|sum_attr:"net_turnover"|floatformat:2 }} CZK</td>
+              <td class="value {% if point_totals.period_confirmed < 0 %}negative{% else %}positive{% endif %}">
+                <strong>{{ point_totals.period_confirmed }} pts</strong>
+              </td>
+              <td></td>
+            </tr>
+          {% endif %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+  
+  <!-- Points Transactions -->
+  <div class="dashboard-section">
+    <h3>Recent Point Transactions</h3>
+    
+    <div class="table-container">
+      <table class="transactions-table">
+        <thead>
+          <tr>
+            <th>Date</th>
+            <th>Brand</th>
+            <th>Description</th>
+            <th>Points</th>
+            <th>Status</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for transaction in recent_transactions %}
+            <tr>
+              <td>{{ transaction.date|date:"d.m.Y" }}</td>
+              <td>{{ transaction.brand.name|default:"N/A" }}</td>
+              <td>{{ transaction.description }}</td>
+              <td class="value {% if transaction.value < 0 %}negative{% else %}positive{% endif %}">
+                {{ transaction.value }} pts
+              </td>
+              <td>
+                <span class="status-badge {{ transaction.status|lower }}">{{ transaction.get_status_display }}</span>
+              </td>
+            </tr>
+          {% empty %}
+            <tr>
+              <td colspan="5">No recent transactions found.</td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+  
+  <!-- Reward Requests -->
+  <div class="dashboard-section">
+    <h3>Recent Reward Requests</h3>
+    
+    <div class="table-container">
+      <table class="transactions-table">
+        <thead>
+          <tr>
+            <th>Date</th>
+            <th>Points</th>
+            <th>Status</th>
+            <th>Note</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for request in reward_requests %}
+            <tr>
+              <td>{{ request.requested_at|date:"d.m.Y" }}</td>
+              <td class="value negative">{{ request.total_points }} pts</td>
+              <td>
+                <span class="status-badge {{ request.status|lower }}">{{ request.get_status_display }}</span>
+              </td>
+              <td>
+                {% if request.note %}
+                <span class="note-indicator" title="{{ request.note|truncatechars:50 }}">✓</span>
+                {% endif %}
+              </td>
+              <td>
+                <a href="{% url 'manager_reward_request_detail' request.id %}" class="details-link">View</a>
+              </td>
+            </tr>
+          {% empty %}
+            <tr>
+              <td colspan="5">No reward requests found.</td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<script>
+  // JavaScript for collapsible sections
+  document.addEventListener('DOMContentLoaded', function() {
+    const collapsibleHeaders = document.querySelectorAll('.collapsible-header');
+    
+    collapsibleHeaders.forEach(header => {
+      header.addEventListener('click', function() {
+        const content = this.nextElementSibling;
+        const indicator = this.querySelector('.toggle-indicator');
+        
+        content.classList.toggle('hidden');
+        indicator.textContent = content.classList.contains('hidden') ? '+' : '-';
+      });
+    });
+  });
+</script>
+{% endblock %}

@@ -1,0 +1,46 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bonusový program - {% block title %}Vítejte{% endblock %}</title>
+    <link rel="stylesheet" href="{% static 'style.css' %}">
+</head>
+<body>
+    <header class="site-header">
+        <div class="header-content">
+            <a href="{% url 'dashboard' %}" class="site-title">Bonusový program</a>
+            <nav class="user-nav">
+                {% if user.is_authenticated %}
+                    Přihlášen jako <em>{{ user.username }}</em>
+                    <a href="{% url 'dashboard' %}">Přehled</a>
+                    <form action="{% url 'logout' %}" method="post">
+                        {% csrf_token %}
+                        <button type="submit">Odhlásit</button>
+                    </form>
+                {% else %}
+                    <a href="{% url 'login' %}">Přihlásit se</a>
+                {% endif %}
+            </nav>
+        </div>
+    </header>
+
+    {% include 'includes/test_environment_warning.html' %}
+
+    <main class="main-container">
+        {% if messages %}
+        <ul class="messages">
+            {% for message in messages %}
+            <li{% if message.tags %} class="{{ message.tags }}"{% endif %}>{{ message }}</li>
+            {% endfor %}
+        </ul>
+        {% endif %}
+
+        {% block content %}
+        {% endblock %}
+    </main>
+
+    {% include 'includes/footer.html' with current_year=2025 %}
+</body>
+</html>

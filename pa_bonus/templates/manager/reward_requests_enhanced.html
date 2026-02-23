@@ -1,0 +1,472 @@
+{% extends "base.html" %}
+{% load pa_bonus_extras %}
+{% block title %}Reward Requests Management{% endblock %}
+
+{% block content %}
+<!-- Apply inline style directly to override the container -->
+<div style="margin-left: -2rem; margin-right: -2rem;">
+    <!-- Alternative: Create a wrapper that breaks out of the container -->
+    <div class="reward-admin-wrapper" style="width: 100vw; position: relative; left: 50%; right: 50%; margin-left: -50vw; margin-right: -50vw; padding: 0 2rem; background-color: var(--background-color);">
+        <div class="reward-admin-container" style="max-width: 1600px; margin: 0 auto; background-color: var(--container-bg); padding: var(--spacing-lg); border-radius: var(--border-radius-lg);">
+            <h1>Reward Requests Management</h1>
+            
+            <!-- Status Tabs Navigation -->
+            <div class="status-tabs">
+                <a href="?{% if search_query %}search={{ search_query }}&{% endif %}{% if date_from %}date_from={{ date_from }}&{% endif %}{% if date_to %}date_to={{ date_to }}&{% endif %}" 
+                   class="tab-link {% if not status_filter %}active{% endif %}">
+                    All <span class="tab-count">{{ status_counts.0.2 }}</span>
+                </a>
+                {% for status_code, status_label, count in status_counts %}
+                    {% if status_code %}
+                    <a href="?status={{ status_code }}{% if search_query %}&search={{ search_query }}{% endif %}{% if date_from %}&date_from={{ date_from }}{% endif %}{% if date_to %}&date_to={{ date_to }}{% endif %}" 
+                       class="tab-link {% if status_filter == status_code %}active{% endif %}">
+                        {{ status_label }} <span class="tab-count">{{ count }}</span>
+                    </a>
+                    {% endif %}
+                {% endfor %}
+            </div>
+            
+            <!-- Search and Filter Bar -->
+            <form method="get" class="filter-bar">
+                <input type="hidden" name="status" value="{{ status_filter }}">
+                
+                <div class="filter-row">
+                    <div class="filter-group">
+                        <input type="text" name="search" placeholder="Search by name, number, or ID..." 
+                               value="{{ search_query }}" class="search-input">
+                    </div>
+                    
+                    <div class="filter-group">
+                        <label>From:</label>
+                        <input type="date" name="date_from" value="{{ date_from }}">
+                    </div>
+                    
+                    <div class="filter-group">
+                        <label>To:</label>
+                        <input type="date" name="date_to" value="{{ date_to }}">
+                    </div>
+                    
+                    <div class="filter-group">
+                        <select name="client">
+                            <option value="">All Clients</option>
+                            {% for client in clients_with_requests %}
+                                <option value="{{ client.id }}" {% if client_filter == client.id|stringformat:"s" %}selected{% endif %}>
+                                    {{ client.first_name }} {{ client.last_name }} ({{ client.user_number }})
+                                </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    
+                    <div class="filter-group">
+                        <select name="sort">
+                            <option value="-requested_at" {% if sort_by == '-requested_at' %}selected{% endif %}>Newest First</option>
+                            <option value="requested_at" {% if sort_by == 'requested_at' %}selected{% endif %}>Oldest First</option>
+                            <option value="-total_points" {% if sort_by == '-total_points' %}selected{% endif %}>Highest Points</option>
+                            <option value="total_points" {% if sort_by == 'total_points' %}selected{% endif %}>Lowest Points</option>
+                            <option value="user__last_name" {% if sort_by == 'user__last_name' %}selected{% endif %}>Client Name</option>
+                        </select>
+                    </div>
+                    
+                    <button type="submit" class="btn-filter">Filter</button>
+                    <a href="{% url 'enhanced_reward_requests' %}" class="btn-reset">Reset</a>
+                </div>
+            </form>
+            
+            <!-- Analytics Summary (Collapsible) -->
+            <div class="analytics-section">
+                <input type="checkbox" id="analytics-toggle" class="toggle-checkbox">
+                <label for="analytics-toggle" class="section-header">
+                    <h3>Analytics & Summary</h3>
+                    <span class="toggle-indicator">▼</span>
+                </label>
+                
+                <div class="analytics-content">
+                    <div class="analytics-grid">
+                        <!-- Summary Cards -->
+                        <div class="stat-card">
+                            <div class="stat-value">{{ analytics.total_requests }}</div>
+                            <div class="stat-label">Total Requests</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-value">{{ analytics.total_points|floatformat:0 }}</div>
+                            <div class="stat-label">Total Points</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-value">{{ analytics.avg_points|floatformat:0 }}</div>
+                            <div class="stat-label">Average Points</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-value">{{ analytics.recent_count }}</div>
+                            <div class="stat-label">Last 7 Days</div>
+                        </div>
+                    </div>
+                    
+                    <!-- Status Breakdown -->
+                    {% if analytics.status_breakdown %}
+                    <div class="status-breakdown">
+                        <h4>Status Breakdown</h4>
+                        <div class="breakdown-grid">
+                            {% for status, data in analytics.status_breakdown.items %}
+                            <div class="breakdown-item">
+                                <span class="breakdown-label">{{ status }}:</span>
+                                <span class="breakdown-value">{{ data.count }} requests ({{ data.points }} pts)</span>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                    {% endif %}
+                    
+                    <!-- Top Rewards -->
+                    {% if analytics.top_rewards %}
+                    <div class="top-rewards">
+                        <h4>Top Requested Rewards</h4>
+                        <table class="compact-table">
+                            <thead>
+                                <tr>
+                                    <th>Code</th>
+                                    <th>Name</th>
+                                    <th>Quantity</th>
+                                    <th>Requests</th>
+                                    <th>Points</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for reward in analytics.top_rewards %}
+                                <tr>
+                                    <td>{{ reward.code }}</td>
+                                    <td>{{ reward.name }}</td>
+                                    <td>{{ reward.quantity }}</td>
+                                    <td>{{ reward.requests }}</td>
+                                    <td>{{ reward.points }}</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+            
+            <!-- Inventory Summary (Collapsible) -->
+            <div class="inventory-section">
+                <input type="checkbox" id="inventory-toggle" class="toggle-checkbox">
+                <label for="inventory-toggle" class="section-header">
+                    <h3>Reward Inventory Summary ({{ status_filter|default:"PENDING" }} Status)</h3>
+                    <span class="toggle-indicator">▼</span>
+                </label>
+                
+                <div class="inventory-content">
+                    <table class="compact-table">
+                        <thead>
+                            <tr>
+                                <th>Code</th>
+                                <th>Reward Name</th>
+                                <th>Total Quantity Needed</th>
+                                <th>Number of Requests</th>
+                                <th>Total Points</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for item in reward_inventory %}
+                            <tr>
+                                <td>{{ item.reward__abra_code }}</td>
+                                <td>{{ item.reward__name }}</td>
+                                <td class="text-center"><strong>{{ item.total_quantity }}</strong></td>
+                                <td class="text-center">{{ item.request_count }}</td>
+                                <td class="text-right">{{ item.total_points }}</td>
+                            </tr>
+                            {% empty %}
+                            <tr>
+                                <td colspan="5" class="text-center">No items found for this status</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            
+            <!-- Main Requests List with Expandable Details -->
+            <div class="requests-section">
+                <div class="section-header-static">
+                    <h3>Requests List</h3>
+                    <div class="bulk-actions">
+                        <form method="post" id="bulk-form" style="display: inline;">
+                            {% csrf_token %}
+                            <input type="hidden" name="action" value="bulk_status_update">
+                            <select name="new_status" class="bulk-status-select">
+                                <option value="">-- Bulk Status Update --</option>
+                                {% for status_code, status_label in request_statuses %}
+                                <option value="{{ status_code }}">Set to {{ status_label }}</option>
+                                {% endfor %}
+                            </select>
+                            <button type="submit" class="btn-bulk-action" onclick="return confirmBulkAction()">Apply to Selected</button>
+                        </form>
+                        <button type="button" class="btn-export" onclick="exportSelected()">Export Selected</button>
+                    </div>
+                </div>
+                
+                <div class="requests-list">
+                    <table class="requests-table">
+                        <thead>
+                            <tr>
+                                <th class="checkbox-col">
+                                    <input type="checkbox" id="select-all" onchange="toggleAllCheckboxes()">
+                                </th>
+                                <th>ID</th>
+                                <th>Client</th>
+                                <th>Status</th>
+                                <th>Points</th>
+                                <th>Date</th>
+                                <th>Note</th>
+                                <th class="expand-col"></th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for request in requests %}
+                            <tr class="request-row status-{{ request.status|lower }}">
+                                <td class="checkbox-col">
+                                    <input type="checkbox" name="selected_requests" value="{{ request.id }}" 
+                                           form="bulk-form" class="request-checkbox">
+                                </td>
+                                <td class="request-id">{{ request.id }}</td>
+                                <td>
+                                    <div class="client-info">
+                                        <strong>{{ request.user.first_name }} {{ request.user.last_name }}</strong>
+                                        <br>
+                                        <small>{{ request.user.user_number }} | {{ request.user.region.name|default:"No Region" }}</small>
+                                    </div>
+                                </td>
+                                <td>
+                                    <span class="status-badge status-{{ request.status|lower }}">
+                                        {{ request.get_status_display }}
+                                    </span>
+                                </td>
+                                <td class="text-right">{{ request.total_points }}</td>
+                                <td>{{ request.requested_at|date:"d.m.Y H:i" }}</td>
+                                <td>
+                                    {% if request.note %}
+                                    <span class="note-indicator" title="{{ request.note }}">✓</span>
+                                    {% endif %}
+                                </td>
+                                <td class="expand-col">
+                                    <label for="expand-{{ request.id }}" class="expand-btn">▼</label>
+                                </td>
+                            </tr>
+                            
+                            <!-- Expandable Detail Row -->
+                            <tr class="detail-row">
+                                <td colspan="8">
+                                    <input type="checkbox" id="expand-{{ request.id }}" class="expand-checkbox">
+                                    <div class="detail-content">
+                                        <div class="detail-grid">
+                                            <!-- Client Details -->
+                                            <div class="detail-section">
+                                                <h4>Client Information</h4>
+                                                <dl class="detail-list">
+                                                    <dt>Client ID:</dt>
+                                                    <dd>{{ request.user.user_number }}</dd>
+                                                    <dt>Full Name:</dt>
+                                                    <dd>{{ request.user.first_name }} {{ request.user.last_name }}</dd>
+                                                    <dt>Email:</dt>
+                                                    <dd>{{ request.user.email }}</dd>
+                                                    <dt>Region:</dt>
+                                                    <dd>{{ request.user.region.name|default:"Not assigned" }}</dd>
+                                                    <dt>Balance:</dt>
+                                                    <dd>{{ request.user.get_balance }} points</dd>
+                                                    <dt>Client Link:</dt>
+                                                    <dd>
+                                                        <a href="https://report.primavera-and.cz:8080/pentaho/api/repos/%3Apublic%3APAA%3Akarta-klienta%3Akarta%20klienta.wcdf/generatedContent?kodZakaznika={{ request.user.user_number }}" 
+                                                           target="_blank">Open in Reporting →</a>
+                                                    </dd>
+                                                </dl>
+                                            </div>
+                                            
+                                            <!-- Request Items -->
+                                            <div class="detail-section">
+                                                <h4>Requested Items</h4>
+                                                <table class="items-table">
+                                                    <thead>
+                                                        <tr>
+                                                            <th>Code</th>
+                                                            <th>Item</th>
+                                                            <th>Qty</th>
+                                                            <th>Points</th>
+                                                            <th>Total</th>
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody>
+                                                        {% for item in request.rewardrequestitem_set.all %}
+                                                        <tr>
+                                                            <td>{{ item.reward.abra_code }}</td>
+                                                            <td>{{ item.reward.name }}</td>
+                                                            <td>{{ item.quantity }}</td>
+                                                            <td>{{ item.point_cost }}</td>
+                                                            <td>{{ item.quantity|multiply:item.point_cost }}</td>
+                                                        </tr>
+                                                        {% endfor %}
+                                                    </tbody>
+                                                    <tfoot>
+                                                        <tr>
+                                                            <th colspan="4">Total:</th>
+                                                            <th>{{ request.total_points }}</th>
+                                                        </tr>
+                                                    </tfoot>
+                                                </table>
+                                            </div>
+                                            
+                                            <!-- Notes and Actions -->
+                                            <div class="detail-section">
+                                                <h4>Notes & Actions</h4>
+                                                
+                                                {% if request.note %}
+                                                <div class="note-box">
+                                                    <strong>Customer Note:</strong>
+                                                    <p>{{ request.note }}</p>
+                                                </div>
+                                                {% endif %}
+                                                
+                                                {% if request.description %}
+                                                <div class="note-box">
+                                                    <strong>Manager Message:</strong>
+                                                    <p>{{ request.description }}</p>
+                                                </div>
+                                                {% endif %}
+                                                
+                                                <!-- Quick Edit Form - FIXED VERSION -->
+                                                <form method="post" action="{% url 'reward_request_quick_edit' request.id %}" class="quick-edit-form">
+                                                    {% csrf_token %}
+                                                    <!-- Store current query parameters to maintain filters after save -->
+                                                    {% for key, value in request.GET.items %}
+                                                        <input type="hidden" name="filter_{{ key }}" value="{{ value }}">
+                                                    {% endfor %}
+                                                    
+                                                    <div class="form-row">
+                                                        <label>Status:</label>
+                                                        <select name="status">
+                                                            {% for status_code, status_label in request_statuses %}
+                                                            <option value="{{ status_code }}" {% if request.status == status_code %}selected{% endif %}>
+                                                                {{ status_label }}
+                                                            </option>
+                                                            {% endfor %}
+                                                        </select>
+                                                    </div>
+                                                    
+                                                    <div class="form-row">
+                                                        <label>Manager Message:</label>
+                                                        <textarea name="manager_message" rows="2">{{ request.description }}</textarea>
+                                                    </div>
+                                                    
+                                                    <div class="form-actions">
+                                                        <button type="submit" class="btn-save">Save Changes</button>
+                                                        <a href="{% url 'manager_reward_request_detail' request.id %}" class="btn-detail">
+                                                            Full Detail View →
+                                                        </a>
+                                                        {% if request.status == 'ACCEPTED' %}
+                                                        <a href="{% url 'export_telemarketing_file' request.id %}" class="btn-export">
+                                                            Export Telemarketing
+                                                        </a>
+                                                        {% endif %}
+                                                    </div>
+                                                </form>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                
+                <!-- Pagination -->
+                {% if page_obj.has_other_pages %}
+                <div class="pagination">
+                    <span class="page-info">
+                        Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}
+                    </span>
+                    <div class="page-links">
+                        {% if page_obj.has_previous %}
+                            <a href="?page=1{% if status_filter %}&status={{ status_filter }}{% endif %}{% if search_query %}&search={{ search_query }}{% endif %}">« First</a>
+                            <a href="?page={{ page_obj.previous_page_number }}{% if status_filter %}&status={{ status_filter }}{% endif %}{% if search_query %}&search={{ search_query }}{% endif %}">‹ Previous</a>
+                        {% endif %}
+                        
+                        {% for num in page_obj.paginator.page_range %}
+                            {% if page_obj.number == num %}
+                                <span class="current-page">{{ num }}</span>
+                            {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
+                                <a href="?page={{ num }}{% if status_filter %}&status={{ status_filter }}{% endif %}{% if search_query %}&search={{ search_query }}{% endif %}">{{ num }}</a>
+                            {% endif %}
+                        {% endfor %}
+                        
+                        {% if page_obj.has_next %}
+                            <a href="?page={{ page_obj.next_page_number }}{% if status_filter %}&status={{ status_filter }}{% endif %}{% if search_query %}&search={{ search_query }}{% endif %}">Next ›</a>
+                            <a href="?page={{ page_obj.paginator.num_pages }}{% if status_filter %}&status={{ status_filter }}{% endif %}{% if search_query %}&search={{ search_query }}{% endif %}">Last »</a>
+                        {% endif %}
+                    </div>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Minimal JavaScript for functionality -->
+<script>
+function toggleAllCheckboxes() {
+    const selectAll = document.getElementById('select-all');
+    const checkboxes = document.getElementsByClassName('request-checkbox');
+    for (let checkbox of checkboxes) {
+        checkbox.checked = selectAll.checked;
+    }
+}
+
+function confirmBulkAction() {
+    const checkboxes = document.querySelectorAll('.request-checkbox:checked');
+    if (checkboxes.length === 0) {
+        alert('Please select at least one request');
+        return false;
+    }
+    return confirm(`Are you sure you want to update ${checkboxes.length} request(s)?`);
+}
+
+function exportSelected() {
+    const checkboxes = document.querySelectorAll('.request-checkbox:checked');
+    if (checkboxes.length === 0) {
+        alert('Please select at least one request to export');
+        return;
+    }
+    
+    // Create a form and submit it
+    const form = document.createElement('form');
+    form.method = 'post';
+    form.action = window.location.pathname;
+    
+    // Add CSRF token
+    const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
+    const csrfInput = document.createElement('input');
+    csrfInput.type = 'hidden';
+    csrfInput.name = 'csrfmiddlewaretoken';
+    csrfInput.value = csrfToken;
+    form.appendChild(csrfInput);
+    
+    // Add action
+    const actionInput = document.createElement('input');
+    actionInput.type = 'hidden';
+    actionInput.name = 'action';
+    actionInput.value = 'bulk_export';
+    form.appendChild(actionInput);
+    
+    // Add selected IDs
+    checkboxes.forEach(checkbox => {
+        const input = document.createElement('input');
+        input.type = 'hidden';
+        input.name = 'selected_requests';
+        input.value = checkbox.value;
+        form.appendChild(input);
+    });
+    
+    document.body.appendChild(form);
+    form.submit();
+}
+</script>
+{% endblock %}

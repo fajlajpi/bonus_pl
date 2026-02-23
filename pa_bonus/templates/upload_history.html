@@ -1,0 +1,24 @@
+{% extends "base.html" %}
+
+{% block title %} Upload History {% endblock title %}
+
+<h2>UPLOAD HISTORY</h2>
+<div class="upload-history-container">
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th>File Name</th>
+                <th>Uploaded By</th>
+                <th>Uploaded At</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for upload in uploads %}
+            <tr>
+                <td>{{ upload.file }}</td>
+                <td>{{ upload.uploaded_by }}</td>
+                <td>{{ upload.uploaded_at }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>

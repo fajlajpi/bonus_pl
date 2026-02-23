@@ -1,0 +1,76 @@
+{% extends "base.html" %}
+{% load pa_bonus_extras %}
+
+{% block title %} Historie transakcí {% endblock title %}
+
+{% block content %}
+<div class="history-container">
+    <h2>Historie bodových transakcí</h2>
+
+    {% if transactions %}
+    <div class="intro-text">
+        <p>Níže naleznete seznam Vašich bodových transakcí v rámci Bonusového programu. Body připisujeme se zpožděním 3 měsíců (fakturace v lednu = připsání v dubnu),
+            abychom umožnili zpracování případných reklamací a dobropisů. Transakce do systému nahráváme vždy na začátku měsíce, neobjevují se ihned.
+        </p>
+        <p>Transakce, které už jsou v systému nahrané, ale čekají na uplynutí 3 měsíců, jsou označené <span class="status-badge pending">čeká na potvrzení</span>. Stav transakce
+            <span class="status-badge confirmed">potvrzeno</span> znamená, že jsme body připsali / strhli, ale samotná žádost o čerpání může ještě čekat na zpracování.
+        </p>
+        <p>Stav konkrétní žádosti zkontrolujte v sekci <a href="{% url 'reward_requests' %}">Žádosti o čerpání</a>.</p>
+      </div>
+    <table class="transactions-table">
+        <thead>
+            <tr>
+                <th>Datum</th>
+                <th>Značka</th>
+                <th>Hodnota</th>
+                <th>Typ</th>
+                <th>Status</th>
+                <th>Detail</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for transaction in transactions %}
+            <tr>
+                <td>{{ transaction.date|czech_date }}</td>
+                <td>{{ transaction.brand.name }}</td>
+                <td class="value {% if transaction.value < 0 %}negative{% else %}positive{% endif %}">
+                    {{ transaction.value }} bodů
+                </td>
+                <td>
+                    {% if transaction.type == 'STANDARD_POINTS' %}
+                        Standardní připsání bodů
+                    {% elif transaction.type == 'REWARD_CLAIM' %}
+                        Žádost o odměnu
+                    {% elif transaction.type == 'CREDIT_NOTE_ADJUST' %}
+                        Korekce dobropisu
+                    {% elif transaction.type == 'EXTRA_POINTS' %}
+                        Extra body
+                    {% elif transaction.type == 'ADJUSTMENT' %}
+                        Manuální korekce
+                    {% endif %}
+                </td>
+                <td>
+                    <span class="status-badge {{ transaction.status|lower }}">
+                        {% if transaction.status == 'PENDING' %}
+                            Čeká na potvrzení
+                        {% elif transaction.status == 'CONFIRMED' %}
+                            Potvrzeno
+                        {% elif transaction.status == 'CANCELLED' %}
+                            Zrušeno
+                        {% elif transaction.status == 'NO-CONTRACT' %}
+                            Transakce bez smlouvy
+                        {% endif %}
+                    </span>
+                </td>
+                <td>
+                    <a href="{% url 'history_detail' transaction.id %}" class="details-link">Detail</a>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    {% else %}
+    <p>Žádné transakce nenalezeny.</p>
+    {% endif %}
+</div>
+{% endblock %}

@@ -1,0 +1,236 @@
+{% extends "base.html" %}
+{% block title %} Manager Dashboard {% endblock %}
+
+{% block content %}
+<!-- Chart.js from CDN -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
+
+<div class="dashboard-container">
+  <h2>Manager Dashboard</h2>
+  
+  <div class="dashboard-intro">
+    <p>Welcome to the Manager Dashboard. Here you can manage all aspects of the bonus program.</p>
+  </div>
+  
+  <div class="dashboard-sections">
+    <!-- Points Overview Section -->
+    <div class="dashboard-section">
+      <h3>System Overview</h3>
+      <div class="stats-summary">
+        <div class="stat-item">
+          <span class="stat-value">{{ points_data.CONFIRMED }}</span>
+          <span class="stat-label">Available Points</span>
+        </div>
+        <div class="stat-item">
+          <span class="stat-value">{{ points_data.PENDING }}</span>
+          <span class="stat-label">Pending Points</span>
+        </div>
+        <div class="stat-item">
+          <span class="stat-value">{{ request_data.PENDING.count }}</span>
+          <span class="stat-label">Pending Requests</span>
+          <span class="stat-subvalue">{{ request_data.PENDING.total_points }} pts</span>
+        </div>
+        <div class="stat-item">
+          <span class="stat-value">{{ request_data.ACCEPTED.count }}</span>
+          <span class="stat-label">Accepted Requests</span>
+          <span class="stat-subvalue">{{ request_data.ACCEPTED.total_points }} pts</span>
+        </div>
+      </div>
+    </div>
+    
+    <!-- Points Distribution Chart -->
+    <div class="dashboard-section">
+      <h3>Points Distribution Visualization</h3>
+      <div id="points-chart-container" style="height: 300px; width: 100%; margin: 20px 0;">
+        <!-- Chart will be rendered here -->
+      </div>
+    </div>
+    
+    <!-- Top Clients -->
+    <div class="dashboard-section">
+      <h3>Top 10 Clients by Available Points</h3>
+      <div class="dashboard-actions" style="margin-bottom: 1rem;">
+        <a href="{% url 'manager_client_create' %}" class="dashboard-button">
+          <span class="button-icon">➕</span>
+          <span class="button-text">Add New Client</span>
+        </a>
+        <a href="{% url 'manager_clients' %}" class="dashboard-button">
+          <span class="button-icon">👥</span>
+          <span class="button-text">View All Clients</span>
+        </a>
+      </div>
+      <div class="table-container">
+        <table class="transactions-table">
+          <thead>
+            <tr>
+              <th>Client</th>
+              <th>Available Points</th>
+              <th>Pending Points</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for client in top_clients %}
+            <tr>
+              <td>{{ client.first_name }} {{ client.last_name }} ({{ client.user_number }})</td>
+              <td class="value positive">{{ client.available_points }}</td>
+              <td>{{ client.pending_points }}</td>
+              <td>
+                <a href="{% url 'manager_client_detail' client.id %}" class="details-link">View</a>
+              </td>
+            </tr>
+            {% empty %}
+            <tr>
+              <td colspan="4">No clients with available points found</td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+    
+    <!-- Reward Requests Section -->
+    <div class="dashboard-section">
+      <h3>Reward Requests</h3>
+      <div class="dashboard-actions">
+        <a href="{% url 'manager_reward_requests' %}" class="dashboard-button">
+          <span class="button-icon">📦</span>
+          <span class="button-text">Manage Reward Requests</span>
+        </a>
+      </div>
+    </div>
+    
+    {% if goal_stats.pending_evaluations > 0 %}
+    <div class="dashboard-section">
+        <h3>Cílové bonusy k vyhodnocení</h3>
+        <div class="stats-summary">
+            <div class="stat-item">
+                <span class="stat-value">{{ goal_stats.pending_evaluations }}</span>
+                <span class="stat-label">Období k vyhodnocení</span>
+            </div>
+            <div class="stat-item">
+                <span class="stat-value">{{ goal_stats.potential_points }}</span>
+                <span class="stat-label">Potenciální body</span>
+            </div>
+        </div>
+        <div class="dashboard-actions">
+            <a href="{% url 'goal_evaluation' %}" class="dashboard-button">
+                <span class="button-icon">🎯</span>
+                <span class="button-text">Vyhodnotit cíle</span>
+            </a>
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- SMS Section -->
+    <div class="dashboard-section">
+      <h3>SMS Exports</h3>
+      <div class="dashboard-actions">
+        <a href="{% url 'sms_export' %}" class="dashboard-button">
+          <span class="button-icon">📱</span>
+          <span class="button-text">Prepare monthly balance SMS Export</span>
+        </a>
+      </div>
+    </div>
+
+    <!-- Transaction Management Section -->
+    <div class="dashboard-section">
+      <h3>Transaction Management</h3>
+      <div class="dashboard-actions">
+        <a href="{% url 'transaction_approval' %}" class="dashboard-button">
+          <span class="button-icon">✅</span>
+          <span class="button-text">Approve Point Transactions</span>
+        </a>
+        <a href="{% url 'upload_file' %}" class="dashboard-button">
+          <span class="button-icon">📤</span>
+          <span class="button-text">Upload Invoice Data</span>
+        </a>
+        <a href="{% url 'upload_stock' %}" class="dashboard-button">
+          <span class="button-icon">📦</span>
+          <span class="button-text">Update Stock Availability</span>
+      </a>
+        <a href="{% url 'upload_history' %}" class="dashboard-button">
+          <span class="button-icon">📋</span>
+          <span class="button-text">Upload History</span>
+        </a>
+      </div>
+    </div>
+    
+    <!-- Reporting Section -->
+    <div class="dashboard-section">
+      <h3>Reporting</h3>
+      <div class="dashboard-actions">
+          <a href="{% url 'reports_hub' %}" class="dashboard-button">
+              <span class="button-icon">&#128202;</span>
+              <span class="button-text">Reports Hub</span>
+          </a>
+          <a href="{% url 'user_activity_dashboard' %}" class="dashboard-button">
+              <span class="button-icon">&#128200;</span>
+              <span class="button-text">User Activity Dashboard</span>
+          </a>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    // Get data from template
+    const confirmedPoints = {{ points_data.CONFIRMED }};
+    const pendingPoints = {{ points_data.PENDING }};
+    const pendingRequests = {{ request_data.PENDING.total_points }};
+    const acceptedRequests = {{ request_data.ACCEPTED.total_points }};
+    
+    // Create data for chart
+    const data = {
+      labels: ['Available Points', 'Pending Points', 'Pending Requests', 'Accepted Requests'],
+      datasets: [{
+        label: 'Points',
+        data: [confirmedPoints, pendingPoints, pendingRequests, acceptedRequests],
+        backgroundColor: [
+          '#48BB78', // Available Points - green
+          '#FFD700', // Pending Points - yellow
+          '#E53E3E', // Pending Requests - red
+          '#4A7CAB'  // Accepted Requests - blue
+        ],
+        borderWidth: 1
+      }]
+    };
+    
+    // Create chart
+    const ctx = document.createElement('canvas');
+    ctx.id = 'pointsChart';
+    document.getElementById('points-chart-container').appendChild(ctx);
+    
+    new Chart(ctx, {
+      type: 'bar',
+      data: data,
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        scales: {
+          y: {
+            beginAtZero: true,
+            title: {
+              display: true,
+              text: 'Points'
+            }
+          }
+        },
+        plugins: {
+          legend: {
+            display: false
+          },
+          tooltip: {
+            callbacks: {
+              label: function(context) {
+                return context.parsed.y.toLocaleString() + ' points';
+              }
+            }
+          }
+        }
+      }
+    });
+  });
+</script>
+{% endblock %}

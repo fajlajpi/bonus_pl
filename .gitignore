@@ -1,0 +1,23 @@
+# Virtual environment
+venv/
+
+#SQLite
+db.sqlite3
+
+#pycache
+*__pycache__*
+
+#uploads
+*/uploads/*
+
+#static files
+/static/
+
+# media files
+*media*
+
+#logs
+*.log
+
+# private file for secret data
+private.py

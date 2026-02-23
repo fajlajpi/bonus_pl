@@ -1,0 +1,41 @@
+{% extends "base.html" %}
+{% block title %}Reports Hub{% endblock %}
+
+{% block content %}
+<div class="dashboard-container">
+  <h2>Reports Hub</h2>
+
+  <div class="dashboard-intro">
+    <p>Generate and download Excel reports for offline analysis. Each report produces
+       an .xlsx file that you can filter and pivot as needed.</p>
+  </div>
+
+  <div class="dashboard-sections">
+    {% for report in reports %}
+    <div class="dashboard-section">
+      <h3>{{ report.title }}</h3>
+      <p>{{ report.description }}</p>
+
+      <div class="dashboard-actions">
+        <form method="post" action="{% url 'report_download' %}">
+          {% csrf_token %}
+          <input type="hidden" name="report_id" value="{{ report.report_id }}">
+          <button type="submit" class="export-button">
+            <span class="button-icon">&#128196;</span>
+            <span class="button-text">Download Excel</span>
+          </button>
+        </form>
+      </div>
+    </div>
+    {% empty %}
+    <div class="dashboard-section">
+      <p>No reports are currently available.</p>
+    </div>
+    {% endfor %}
+  </div>
+
+  <div class="dashboard-section" style="margin-top: var(--spacing-lg);">
+    <a href="{% url 'manager_dashboard' %}" class="details-link">&larr; Back to Dashboard</a>
+  </div>
+</div>
+{% endblock %}

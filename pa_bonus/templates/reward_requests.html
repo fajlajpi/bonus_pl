@@ -1,0 +1,67 @@
+{% extends "base.html" %}
+{% load pa_bonus_extras %}
+
+{% block title %} Seznam žádostí o čerpání {% endblock title %}
+
+{% block content %}
+<div class="history-container">
+    <h2>Žádosti o čerpání odměn</h2>
+
+    {% if reward_requests %}
+    <table class="transactions-table">
+        <thead>
+            <tr>
+                <th>Datum</th>
+                <th>Hodnota</th>
+                <th>Status</th>
+                <th>Poznámka</th>
+                <th>Detail</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for reward_request in reward_requests %}
+            <tr>
+                <td>{{ reward_request.requested_at|czech_date }}</td>
+                <td>{{ reward_request.total_points }} bodů</td>
+                <td>
+                    <span class="status-badge {{ reward_request.status|lower }}">
+                        {% if reward_request.status == 'DRAFT' %}
+                            Koncept
+                        {% elif reward_request.status == 'PENDING' %}
+                            Čeká na potvrzení
+                        {% elif reward_request.status == 'ACCEPTED' %}
+                            Potvrzena
+                        {% elif reward_request.status == 'REJECTED' %}
+                            Odmítnuta
+                        {% elif reward_request.status == 'FINISHED' %}
+                            Dokončena
+                        {% elif reward_request.status == 'CANCELLED' %}
+                            Zrušena
+                        {% endif %}
+                    </span>
+                </td>
+                <td>
+                    {% if reward_request.note %}
+                    <span class="note-indicator" title="{{ reward_request.note|truncatechars:50 }}">✓</span>
+                    {% endif %}
+                </td>
+                <td>
+                    <a href="{% url 'rewards_request_detail' reward_request.id %}" class="details-link">Detail</a>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    {% else %}
+    <p>Žádné žádosti nenalezeny.</p>
+    {% endif %}
+</div>
+
+<style>
+    .note-indicator {
+        color: var(--primary-color);
+        font-weight: bold;
+        cursor: help;
+    }
+</style>
+{% endblock %}

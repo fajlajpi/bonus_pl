@@ -1,0 +1,57 @@
+{% extends "base.html" %}
+{% block title %} All Reward Requests {% endblock %}
+{% block content %}
+<h2>Manager Dashboard — Reward Requests</h2>
+
+<form method="get">
+  <label for="status">Filter by status:</label>
+  <select name="status" id="status">
+    <option value="">-- All --</option>
+    {% for status, label in request_obj.REQUEST_STATUS %}
+      <option value="{{ status }}" {% if request.GET.status == status %}selected{% endif %}>{{ label }}</option>
+    {% endfor %}
+  </select>
+  <button type="submit">Filter</button>
+</form>
+
+<table class="transactions-table">
+  <thead>
+    <tr>
+      <th>ID</th>
+      <th>Client Number</th>
+      <th>Client Name</th>
+      <th>Status</th>
+      <th>Total Points</th>
+      <th>Requested At</th>
+      <th>Note</th>
+      <th>Actions</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for request in reward_requests %}
+    <tr>
+      <td>{{ request.id }}</td>
+      <td>{{ request.user.user_number }}</td>
+      <td>{{ request.user.first_name }} {{ request.user.last_name }}</td>
+      <td>{{ request.get_status_display }}</td>
+      <td>{{ request.total_points }}</td>
+      <td>{{ request.requested_at }}</td>
+      <td>
+        {% if request.note %}
+        <span class="note-indicator" title="{{ request.note|truncatechars:50 }}">✓</span>
+        {% endif %}
+      </td>
+      <td><a class="details-link" href="{% url 'manager_reward_request_detail' request.id %}">View</a></td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+
+<style>
+  .note-indicator {
+    color: var(--primary-color);
+    font-weight: bold;
+    cursor: help;
+  }
+</style>
+{% endblock %}

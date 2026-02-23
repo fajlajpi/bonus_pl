@@ -1,0 +1,141 @@
+{% extends "base.html" %}
+{% block title %} User Activity Dashboard {% endblock %}
+
+{% block content %}
+<!-- Chart.js from CDN -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
+
+<div class="dashboard-container">
+  <h2>User Activity Dashboard</h2>
+  
+  <div class="dashboard-intro">
+    <p>This dashboard shows user activity statistics for your bonus program.</p>
+  </div>
+  
+  <div class="dashboard-sections">
+    <!-- Overview Stats Section -->
+    <div class="dashboard-section">
+      <h3>Activity Overview</h3>
+      <div class="stats-summary">
+        <div class="stat-item">
+          <span class="stat-value">{{ total_users }}</span>
+          <span class="stat-label">Total Users</span>
+        </div>
+        <div class="stat-item">
+          <span class="stat-value">{{ recently_active }}</span>
+          <span class="stat-label">Active Last 7 Days</span>
+        </div>
+        <div class="stat-item">
+          <span class="stat-value">{{ active_percent|floatformat:1 }}%</span>
+          <span class="stat-label">Engagement Rate</span>
+        </div>
+      </div>
+    </div>
+    
+    <!-- Activity Chart -->
+    <div class="dashboard-section">
+      <h3>Daily Activity (Last 30 Days)</h3>
+      <div id="activity-chart-container" style="height: 300px; width: 100%; margin: 20px 0;">
+        <!-- Chart will be rendered here -->
+        <canvas id="activityChart"></canvas>
+      </div>
+    </div>
+    
+    <!-- Most Active Users -->
+    <div class="dashboard-section">
+      <h3>Most Active Users (Last 30 Days)</h3>
+      <div class="table-container">
+        <table class="transactions-table">
+          <thead>
+            <tr>
+              <th>User</th>
+              <th>Email</th>
+              <th>Total Visits</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for user in most_active_users %}
+            <tr>
+              <td>{{ user.user__first_name }} {{ user.user__last_name }}</td>
+              <td>{{ user.user__email }}</td>
+              <td>{{ user.total_visits }}</td>
+            </tr>
+            {% empty %}
+            <tr>
+              <td colspan="3">No activity data found</td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    // Prepare data for chart
+    const dates = [{% for item in daily_activity %}"{{ item.day|date:'M d' }}",{% endfor %}];
+    const users = [{% for item in daily_activity %}{{ item.users }},{% endfor %}];
+    const visits = [{% for item in daily_activity %}{{ item.visits }},{% endfor %}];
+    
+    // Create chart
+    const ctx = document.getElementById('activityChart').getContext('2d');
+    
+    new Chart(ctx, {
+      type: 'line',
+      data: {
+        labels: dates,
+        datasets: [
+          {
+            label: 'Active Users',
+            borderColor: '#4A7CAB',
+            backgroundColor: 'rgba(74, 124, 171, 0.1)',
+            data: users,
+            yAxisID: 'y-users',
+            tension: 0.1
+          },
+          {
+            label: 'Total Visits',
+            borderColor: '#48BB78',
+            backgroundColor: 'rgba(72, 187, 120, 0.1)',
+            data: visits,
+            yAxisID: 'y-visits',
+            tension: 0.1
+          }
+        ]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        scales: {
+          x: {
+            grid: {
+              display: false
+            }
+          },
+          'y-users': {
+            position: 'left',
+            title: {
+              display: true,
+              text: 'Users'
+            },
+            beginAtZero: true
+          },
+          'y-visits': {
+            position: 'right',
+            title: {
+              display: true,
+              text: 'Visits'
+            },
+            beginAtZero: true,
+            grid: {
+              display: false
+            }
+          }
+        }
+      }
+    });
+  });
+</script>
+{% endblock %}

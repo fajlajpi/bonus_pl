@@ -1,0 +1,132 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load pa_bonus_extras %}
+
+{% block title %}Cílové bonusy{% endblock %}
+
+{% block content %}
+<div class="extra-goals-container">
+    <h1>Cílové bonusy</h1>
+    
+    {% if error %}
+        <div class="no-contract-message">
+            <p>{{ error }}</p>
+        </div>
+    {% elif not goals %}
+        <div class="no-goals-message">
+            <p>Pro vaši smlouvu nejsou aktuálně nastaveny žádné cílové bonusy.</p>
+            <p>V případě dotazů kontaktujte svého obchodního zástupce.</p>
+        </div>
+    {% else %}
+        <div class="goals-intro">
+            <p>Zde můžete sledovat plnění vašich cílových bonusů. Za překročení stanovených cílů získáváte bonusové body navíc.</p>
+        </div>
+        
+        {% for goal_data in goals %}
+        <div class="goal-card">
+            <div class="goal-header">
+                <h2>Cílový bonus č. {{ forloop.counter }}</h2>
+                <div class="goal-period">
+                    {{ goal_data.goal.goal_period_from|date:"d.m.Y" }} - {{ goal_data.goal.goal_period_to|date:"d.m.Y" }}
+                </div>
+            </div>
+            
+            <div class="goal-brands">
+                <strong>Značky:</strong>
+                {% for brand in goal_data.brands %}
+                    <span class="brand-badge">{{ brand.name }}</span>
+                {% endfor %}
+            </div>
+            
+            <div class="goal-summary">
+                <div class="summary-item">
+                    <span class="summary-label">Celkový cíl:</span>
+                    <span class="summary-value">{{ goal_data.goal.goal_value|floatformat:0 }} Kč</span>
+                </div>
+                <div class="summary-item">
+                    <span class="summary-label">Aktuální obrat:</span>
+                    <span class="summary-value">{{ goal_data.total_actual|floatformat:0 }} Kč</span>
+                </div>
+                <div class="summary-item">
+                    <span class="summary-label">Celkem splněno:</span>
+                    <div class="progress-bar-container">
+                        <div class="progress-bar" style="width: {{ goal_data.total_progress|floatformat:0 }}%">
+                            <span class="progress-text">{{ goal_data.total_progress|floatformat:0 }}%</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="evaluation-periods">
+                <h3>Hodnocená období</h3>
+                <div class="periods-grid">
+                    {% for period in goal_data.periods %}
+                    <div class="period-card {% if period.is_current %}current-period{% endif %} status-{{ period.status }}">
+                        <div class="period-header">
+                            <span class="period-dates">
+                                {{ period.start|date:"d.m.Y" }} - {{ period.end|date:"d.m.Y" }}
+                            </span>
+                            {% if period.is_current %}
+                                <span class="current-badge">Aktuální</span>
+                            {% endif %}
+                        </div>
+                        
+                        <div class="period-status">
+                            {% if period.status == 'achieved' %}
+                                <span class="status-indicator achieved">✓ Splněno</span>
+                            {% elif period.status == 'failed' %}
+                                <span class="status-indicator failed">✗ Nesplněno</span>
+                            {% elif period.status == 'pending_evaluation' %}
+                                <span class="status-indicator pending">⏳ Čeká na vyhodnocení</span>
+                            {% elif period.status == 'in_progress' %}
+                                <span class="status-indicator progress">⚡ Probíhá</span>
+                            {% else %}
+                                <span class="status-indicator future">🗓 Budoucí</span>
+                            {% endif %}
+                        </div>
+                        
+                        <div class="period-details">
+                            <div class="detail-row">
+                                <span>Cíl období:</span>
+                                <span>{{ period.target|floatformat:0 }} Kč</span>
+                            </div>
+                            <div class="detail-row">
+                                <span>Aktuální obrat:</span>
+                                <span>{{ period.actual|floatformat:0 }} Kč</span>
+                            </div>
+                            {% if period.status != 'future' %}
+                            <div class="detail-row">
+                                <span>Splněno:</span>
+                                <div class="mini-progress-bar">
+                                    <div class="mini-progress-fill" style="width: {{ period.progress|floatformat:0 }}%"></div>
+                                </div>
+                                <span>{{ period.progress|floatformat:0 }}%</span>
+                            </div>
+                            {% endif %}
+                            {% if period.bonus_points > 0 %}
+                                <div class="detail-row bonus-points">
+                                    <span>Bonusové body:</span>
+                                    <span class="points-value">+{{ period.bonus_points }} bodů</span>
+                                </div>
+                            {% elif period.status == 'in_progress' and period.potential_points > 0 %}
+                                <div class="detail-row bonus-points">
+                                    <span>Při splnění získáte:</span>
+                                    <span class="points-value potential">{{ period.potential_points }} bodů</span>
+                                </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+            
+            {% if goal_data.goal.allow_full_period_recovery %}
+            <div class="recovery-note">
+                <p><strong>Poznámka:</strong> Pokud nesplníte dílčí cíle, ale splníte celkový cíl za celé období, získáte zpětně bonusové body za celé období.</p>
+            </div>
+            {% endif %}
+        </div>
+        {% endfor %}
+    {% endif %}
+</div>
+{% endblock %}

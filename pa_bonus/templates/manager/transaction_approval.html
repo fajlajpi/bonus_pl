@@ -1,0 +1,105 @@
+{% extends "base.html" %}
+{% block title %} Schválení bodových transakcí {% endblock %}
+
+{% block content %}
+<div class="approval-container">
+  <h2>Schválení bodových transakcí</h2>
+  
+  <div class="intro-text">
+    <p>Zde můžete schválit transakce z vybraného měsíce. Aplikace standardně zobrazuje měsíc, 
+      který je připraven ke schválení (transakce starší 3 měsíce).</p>
+    <p>Po schválení se transakce změní ze stavu <strong>"Pending"</strong> na <strong>"Confirmed"</strong> 
+       a body budou započítány do zůstatku zákazníka. Zákazníkům bude také odeslána emailová notifikace.</p>
+  </div>
+
+  <form method="get" class="filter-form">
+    <div class="form-group">
+      <label for="year">Rok:</label>
+      <select name="year" id="year">
+        {% for year in available_years %}
+          <option value="{{ year }}" {% if year == selected_year %}selected{% endif %}>{{ year }}</option>
+        {% endfor %}
+      </select>
+    </div>
+    
+    <div class="form-group">
+      <label for="month">Měsíc:</label>
+      <select name="month" id="month">
+        {% for month_num, month_name in available_months %}
+          <option value="{{ month_num }}" {% if month_num == selected_month %}selected{% endif %}>{{ month_name }}</option>
+        {% endfor %}
+      </select>
+    </div>
+    
+    <button type="submit" class="submit-button">Zobrazit transakce</button>
+  </form>
+
+  {% if is_approval_month %}
+    <div class="approval-notification">
+      <p><strong>Poznámka:</strong> Tento měsíc je připraven ke schválení podle pravidla tří měsíců.</p>
+    </div>
+  {% endif %}
+
+  <div class="stats-container">
+    <h3>Statistika transakcí: {{ month_name }} {{ selected_year }}</h3>
+    <p>Období: {{ start_date|date:"d.m.Y" }} - {{ end_date|date:"d.m.Y" }}</p>
+    <div class="stats-summary">
+      <div class="stat-item">
+        <span class="stat-value">{{ stats.total_transactions|default:"0" }}</span>
+        <span class="stat-label">Transakcí ke schválení</span>
+      </div>
+      <div class="stat-item">
+        <span class="stat-value">{{ stats.total_points|default:"0" }}</span>
+        <span class="stat-label">Celkem bodů</span>
+      </div>
+    </div>
+  </div>
+
+  {% if pending_transactions %}
+    <form method="post" class="approval-form">
+      {% csrf_token %}
+      <input type="hidden" name="year" value="{{ selected_year }}">
+      <input type="hidden" name="month" value="{{ selected_month }}">
+      
+      <div class="table-container">
+        <table class="transactions-table">
+          <thead>
+            <tr>
+              <th>Datum</th>
+              <th>Zákazník</th>
+              <th>Číslo zákazníka</th>
+              <th>Značka</th>
+              <th>Body</th>
+              <th>Popis</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for transaction in pending_transactions %}
+              <tr>
+                <td>{{ transaction.date|date:"d.m.Y" }}</td>
+                <td>{{ transaction.user.first_name }} {{ transaction.user.last_name }}</td>
+                <td>{{ transaction.user.user_number }}</td>
+                <td>{{ transaction.brand.name }}</td>
+                <td class="value {% if transaction.value < 0 %}negative{% else %}positive{% endif %}">
+                  {{ transaction.value }}
+                </td>
+                <td>{{ transaction.description }}</td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+      
+      <div class="approval-actions">
+        <button type="submit" class="submit-button" onclick="return confirm('Opravdu chcete schválit {{ stats.total_transactions }} transakcí s celkem {{ stats.total_points }} body?')">
+          Schválit transakce ({{ stats.total_transactions }})
+        </button>
+      </div>
+    </form>
+  {% else %}
+    <div class="no-transactions">
+      <p>Žádné čekající transakce pro vybrané období.</p>
+    </div>
+  {% endif %}
+</div>
+{% endblock %}

@@ -1,0 +1,42 @@
+{% extends "base.html" %}
+{% load static %}
+{% block title %} Katalog odměn {% endblock title %}
+
+{% block content %}
+<div class="catalogue-container">
+  <h1>Katalog odměn</h1>
+  <p class="catalogue-intro">
+    Prohlédněte si výběr z nabídky odměn, které můžete získat v našem bonusovém programu. 
+    Pro zjištění ceny a dostupnosti jednotlivých položek se prosím <a href="{% url 'login' %}">přihlaste</a> do vašeho účtu.
+  </p>
+
+  {% if rewards %}
+    <div class="rewards-grid">
+      {% for reward in rewards %}
+        <div class="reward-card">
+          <div class="reward-image-container">
+            {% if reward.image %}
+              <img src="{{ reward.image.url }}" alt="{{ reward.name }}" class="reward-image">
+            {% else %}
+              <img src="{% static 'images/default.png' %}" alt="Default Image" class="reward-image">
+            {% endif %}
+          </div>
+          <div class="reward-info">
+            <h3 class="reward-name">{{ reward.name }}</h3>
+            <p class="reward-description">{{ reward.description }}</p>
+            {% if reward.brand %}
+              <span class="reward-brand">{{ reward.brand.name }}</span>
+            {% endif %}
+          </div>
+        </div>
+      {% endfor %}
+    </div>
+    
+    <div class="catalogue-cta">
+      <p>Pro získání těchto a mnoha dalších odměn se <a href="{% url 'login' %}">přihlaste</a> do bonusového programu nebo <a href="{% url 'contact' %}">kontaktujte</a> svého obchodního zástupce.</p>
+    </div>
+  {% else %}
+    <p>V tuto chvíli nejsou dostupné žádné odměny k zobrazení.</p>
+  {% endif %}
+</div>
+{% endblock %}

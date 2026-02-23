@@ -1,0 +1,79 @@
+{% extends "base.html" %}
+{% load pa_bonus_extras %}
+
+{% block title %} Přehled {% endblock title %}
+
+{% block content %}
+<div class="dashboard-container">
+    <h2>Přehled bonusového programu pro: {{ user.first_name }} {{ user.last_name }}</h2>
+    
+    <div class="points-summary">
+        <h3>Aktuální stav bodového konta</h3>
+        <p class="total-points">{{ total_points }} bodů</p>
+    </div>
+
+    {% if contract %}
+    <div class="contract-details dashboard-section">
+        <h3>Bonusy za značky</h3>
+        <ul>
+        {% for bonus in brand_bonuses %}
+            <li><strong>{{ bonus.brand_id.name }}</strong>: {{ 1|divide:bonus.points_ratio }} Kč fakturace bez DPH na 1 bod</li>
+        {% endfor %}
+        </ul>
+    </div>
+    {% else %}
+    <p>Bez aktivních členství.</p>
+    {% endif %}
+
+    {% if active_goal %}
+    <div class="dashboard-section goal-summary-widget contract-details">
+        <h3>Aktuální cílový bonus</h3>
+        <div class="goal-period-info">
+            <p>Období: {{ active_goal.period_start|date:"d.m.Y" }} - {{ active_goal.period_end|date:"d.m.Y" }}</p>
+        </div>
+        
+        <div class="goal-progress-summary">
+            <div class="progress-info">
+                <div class="progress-row">
+                    <span>Cíl období:</span>
+                    <strong>{{ active_goal.target|floatformat:0 }} Kč</strong>
+                </div>
+                <div class="progress-row">
+                    <span>Aktuální obrat:</span>
+                    <strong>{{ active_goal.actual|floatformat:0 }} Kč</strong>
+                </div>
+                <div class="progress-row">
+                    <span>Zbývá do cíle:</span>
+                    <strong>{{ active_goal.remaining|floatformat:0 }} Kč</strong>
+                </div>
+            </div>
+            
+            <div class="summary-item">
+                <div class="progress-bar-container">
+                    <div class="progress-bar" style="width: {{ active_goal.progress|floatformat:0 }}%">
+                        <span class="progress-text">{{ active_goal.progress|floatformat:0 }}%</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="goal-action">
+            <a href="{% url 'extra_goals_detail' %}" class="details-link">
+                Zobrazit všechny cíle
+            </a>
+        </div>
+    </div>
+    {% endif %}
+
+
+    <div class="quick-links">
+        <h3>Rychlé odkazy</h3>
+        <ul>
+            <li><a href="{% url 'history' %}">Historie bodových transakcí</a></li>
+            <li><a href="{% url 'rewards' %}">Nabídka odměn</a></li>
+            <li><a href="{% url 'reward_requests' %}">Žádosti o čerpání odměn</a></li>
+            <li><a href="{% url 'extra_goals_detail' %}">Extra cíle</a></li>
+        </ul>
+    </div>
+</div>
+{% endblock %}

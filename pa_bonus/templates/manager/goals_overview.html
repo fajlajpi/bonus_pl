@@ -1,0 +1,177 @@
+{% extends "base.html" %}
+{% load pa_bonus_extras %}
+
+{% block title %}Goals Overview{% endblock %}
+
+{% block content %}
+<div class="goals-overview-container">
+    <h1>Extra Goals Progress Overview</h1>
+    
+    <!-- Export Buttons Section -->
+    <div class="dashboard-section" style="margin-bottom: 2rem;">
+        <h3>Export Options</h3>
+        <div class="dashboard-actions">
+            <a href="?export=full{% if selected_region != 'all' %}&region={{ selected_region }}{% endif %}{% if selected_brand != 'all' %}&brand={{ selected_brand }}{% endif %}" 
+               class="export-button">
+                <span class="button-icon">📊</span>
+                <span class="button-text">Full Contract Export</span>
+            </a>
+            <a href="?export=current{% if selected_region != 'all' %}&region={{ selected_region }}{% endif %}{% if selected_brand != 'all' %}&brand={{ selected_brand }}{% endif %}" 
+               class="export-button">
+                <span class="button-icon">📈</span>
+                <span class="button-text">Current Period Export</span>
+            </a>
+        </div>
+        <p style="font-size: 0.9rem; color: #666; margin-top: 1rem;">
+            <strong>Full Contract Export:</strong> Complete contract data from start to current date<br>
+            <strong>Current Period Export:</strong> Only the current milestone period data with remaining targets
+        </p>
+    </div>
+
+    <!-- Filter Form -->
+    <form method="get" class="filter-form">
+        <div class="form-group">
+            <label for="region">Region:</label>
+            <select name="region" id="region">
+                <option value="all" {% if selected_region == 'all' %}selected{% endif %}>All Regions</option>
+                {% for region in regions %}
+                    <option value="{{ region.id }}" {% if selected_region == region.id|stringformat:"s" %}selected{% endif %}>
+                        {{ region.name }}
+                    </option>
+                {% endfor %}
+            </select>
+        </div>
+        
+        <div class="form-group">
+            <label for="brand">Brand:</label>
+            <select name="brand" id="brand">
+                <option value="all" {% if selected_brand == 'all' %}selected{% endif %}>All Brands</option>
+                {% for brand in brands %}
+                    <option value="{{ brand.id }}" {% if selected_brand == brand.id|stringformat:"s" %}selected{% endif %}>
+                        {{ brand.name }}
+                    </option>
+                {% endfor %}
+            </select>
+        </div>
+        
+        <div class="form-actions">
+            <button type="submit" class="btn">Apply Filters</button>
+        </div>
+    </form>
+
+    <!-- Summary Section -->
+    {% if summary.total_goals > 0 %}
+    <div class="goals-summary-section">
+        <h2>Summary Statistics</h2>
+        <div class="summary-stats">
+            <div class="stat-card">
+                <div class="stat-value">{{ summary.total_goals }}</div>
+                <div class="stat-label">Total Goals</div>
+            </div>
+            <div class="stat-card on-track">
+                <div class="stat-value">{{ summary.on_track }}</div>
+                <div class="stat-label">On Track</div>
+            </div>
+            <div class="stat-card slightly-behind">
+                <div class="stat-value">{{ summary.slightly_behind }}</div>
+                <div class="stat-label">Slightly Behind</div>
+            </div>
+            <div class="stat-card behind">
+                <div class="stat-value">{{ summary.behind }}</div>
+                <div class="stat-label">Behind Schedule</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value">{{ summary.avg_percentage|floatformat:1 }}%</div>
+                <div class="stat-label">Average Progress</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Goals Overview Table -->
+    <div class="table-container">
+        <table class="goals-overview-table">
+            <thead>
+                <tr>
+                    <th>Client</th>
+                    <th>Contract Period</th>
+                    <th>Brands</th>
+                    <th>Goal Progress</th>
+                    <th class="ideal-column">Ideal Progress</th>
+                    <th>Track Status</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for data in goal_data %}
+                <tr class="goal-row status-{{ data.track_status }}">
+                    <td class="client-info">
+                        <strong>{{ data.user.first_name }} {{ data.user.last_name }}</strong><br>
+                        <small>{{ data.user.user_number }}</small><br>
+                        <small>{{ data.user.region.name|default:"No Region" }}</small>
+                    </td>
+                    <td class="contract-dates">
+                        {{ data.goal.goal_period_from|czech_date:"j.n.Y" }} - {{ data.goal.goal_period_to|czech_date:"j.n.Y" }}<br>
+                        <small>{{ data.days_elapsed }} / {{ data.days_total }} days</small>
+                    </td>
+                    <td class="brands-list">
+                        {% for brand in data.brands %}
+                            <span class="brand-badge-small">{{ brand.name }}</span>
+                        {% endfor %}
+                    </td>
+                    <td>
+                        <div class="percentage-display">{{ data.goal_percentage|floatformat:1 }}%</div>
+                        <div class="mini-progress-container">
+                            <div class="mini-progress-fill" style="width: {{ data.goal_percentage|floatformat:0 }}%"></div>
+                        </div>
+                        <div class="progress-note">
+                            {{ data.current_turnover|floatformat:0 }} / {{ data.goal.goal_value|floatformat:0 }}
+                        </div>
+                    </td>
+                    <td class="ideal-column">
+                        <div class="percentage-display">{{ data.ideal_percentage|floatformat:1 }}%</div>
+                        <div class="mini-progress-container">
+                            <div class="mini-progress-fill" style="width: {{ data.ideal_percentage|floatformat:0 }}%"></div>
+                        </div>
+                        <div class="progress-note">
+                            {{ data.current_turnover|floatformat:0 }} / {{ data.ideal_turnover|floatformat:0 }}
+                        </div>
+                    </td>
+                    <td>
+                        <span class="track-badge {{ data.track_status }}">
+                            {% if data.track_status == 'on_track' %}On Track
+                            {% elif data.track_status == 'slightly_behind' %}Slightly Behind
+                            {% else %}Behind Schedule{% endif %}
+                        </span>
+                        <div class="track-percentage">{{ data.ideal_percentage|floatformat:1 }}% of ideal</div>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% else %}
+    <div class="no-data">
+        <h3>No Extra Goals Found</h3>
+        <p>No extra goals match the current filter criteria or there are no active goals in the system.</p>
+    </div>
+    {% endif %}
+
+    <!-- Legend Section -->
+    <div class="legend-section">
+        <h3>Legend</h3>
+        <div class="legend-grid">
+            <div class="legend-item">
+                <span class="track-badge on-track">On Track</span>
+                <p>Client is achieving 95% or more of their ideal linear progress</p>
+            </div>
+            <div class="legend-item">
+                <span class="track-badge slightly-behind">Slightly Behind</span>
+                <p>Client is achieving between 85-94% of their ideal linear progress</p>
+            </div>
+            <div class="legend-item">
+                <span class="track-badge behind">Behind Schedule</span>
+                <p>Client is achieving less than 85% of their ideal linear progress</p>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

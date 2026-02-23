@@ -1,0 +1,151 @@
+{% extends "base.html" %}
+{% load pa_bonus_extras %}
+{% block title %} Client Management {% endblock %}
+
+{% block content %}
+<div class="dashboard-container">
+  <h2>Client Management</h2>
+  
+  <div class="dashboard-intro">
+    <p>View and analyze all clients registered in the bonus program. Filter by region and time period to see relevant turnover and points data.</p>
+  </div>
+  
+  <!-- Filter Form -->
+  <div class="dashboard-section">
+    <h3>Filter Options</h3>
+    
+    <form method="get" class="filter-form">
+      <div class="form-group">
+        <label for="region">Region:</label>
+        <select name="region" id="region">
+          <option value="all">All Regions</option>
+          {% for region in regions %}
+            <option value="{{ region.id }}" {% if selected_region == region.id|stringformat:"i" %}selected{% endif %}>
+              {{ region.name }}
+            </option>
+          {% endfor %}
+        </select>
+      </div>
+      
+      <div class="form-group">
+        <label>Period From:</label>
+        <div class="date-inputs">
+          <select name="month_from" id="month_from">
+            {% for month_num, month_name in months %}
+              <option value="{{ month_num }}" {% if month_from == month_num %}selected{% endif %}>
+                {{ month_name }}
+              </option>
+            {% endfor %}
+          </select>
+          <select name="year_from" id="year_from">
+            {% with current_year|add:-5 as start_year %}
+            {% year_range start_year current_year as years %}
+            {% for year in years %}
+              <option value="{{ year }}" {% if year_from == year %}selected{% endif %}>
+                {{ year }}
+              </option>
+            {% endfor %}
+            {% endwith %}
+          </select>
+        </div>
+      </div>
+      
+      <div class="form-group">
+        <label>Period To:</label>
+        <div class="date-inputs">
+          <select name="month_to" id="month_to">
+            {% for month_num, month_name in months %}
+              <option value="{{ month_num }}" {% if month_to == month_num %}selected{% endif %}>
+                {{ month_name }}
+              </option>
+            {% endfor %}
+          </select>
+          <select name="year_to" id="year_to">
+            {% with current_year|add:-5 as start_year %}
+            {% year_range start_year current_year as years %}
+            {% for year in years %}
+              <option value="{{ year }}" {% if year_to == year %}selected{% endif %}>
+                {{ year }}
+              </option>
+            {% endfor %}
+            {% endwith %}
+          </select>
+        </div>
+      </div>
+      
+      <div class="form-actions">
+        <button type="submit" class="submit-button">Apply Filters</button>
+      </div>
+    </form>
+    
+    <!-- Quick Filter Buttons -->
+    <div class="quick-filters">
+      <a href="?year_from={{ ytd_from.year }}&month_from={{ ytd_from.month }}&year_to={{ ytd_to.year }}&month_to={{ ytd_to.month }}&region={{ selected_region }}" class="filter-button">
+        YTD ({{ ytd_from|date:"M Y" }} - {{ ytd_to|date:"M Y" }})
+      </a>
+      <a href="?year_from={{ last_year_from.year }}&month_from={{ last_year_from.month }}&year_to={{ last_year_to.year }}&month_to={{ last_year_to.month }}&region={{ selected_region }}" class="filter-button">
+        Last Year ({{ last_year_from.year }})
+      </a>
+      <a href="?year_from={{ current_year }}&month_from=1&year_to={{ current_year }}&month_to=12&region={{ selected_region }}" class="filter-button">
+        This Year ({{ current_year }})
+      </a>
+    </div>
+  </div>
+  
+  <!-- Client List -->
+  <div class="dashboard-section">
+    <h3>Client List</h3>
+    <p>Period: {{ date_from|date:"d.m.Y" }} - {{ date_to|date:"d.m.Y" }}</p>
+    
+    <div class="table-container">
+      <table class="transactions-table">
+        <thead>
+          <tr>
+            <th>Client</th>
+            <th>Client Number</th>
+            <th>Region</th>
+            <th>Contract Brands</th>
+            <th>Period Turnover</th>
+            <th>Points (Period)</th>
+            <th>Available Points</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for entry in clients %}
+          <tr>
+            <td>{{ entry.user.first_name }} {{ entry.user.last_name }}</td>
+            <td>{{ entry.user.user_number }}</td>
+            <td>{{ entry.user.region.name|default:"No Region" }}</td>
+            <td>
+              {% if entry.contract %}
+                {{ entry.brand_count }} brand(s)
+              {% else %}
+                No contract
+              {% endif %}
+            </td>
+            <td>{{ entry.turnover|floatformat:2 }} CZK</td>
+            <td class="value {% if entry.user.confirmed_points < 0 %}negative{% else %}positive{% endif %}">
+              {{ entry.user.confirmed_points }} pts
+              {% if entry.user.pending_points > 0 %}
+                <span class="pending-points-badge">+{{ entry.user.pending_points }} pending</span>
+              {% endif %}
+            </td>
+            <td class="value {% if entry.user.available_points < 0 %}negative{% else %}positive{% endif %}">
+              {{ entry.user.available_points }} pts
+            </td>
+            <td>
+              <a href="{% url 'manager_client_detail' entry.user.id %}?year_from={{ year_from }}&month_from={{ month_from }}&year_to={{ year_to }}&month_to={{ month_to }}" class="details-link">View</a>
+            </td>
+          </tr>
+          {% empty %}
+          <tr>
+            <td colspan="8">No clients found matching the selected filters.</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+{% endblock %}

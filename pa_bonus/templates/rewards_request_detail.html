@@ -1,0 +1,118 @@
+{% extends 'base.html' %}
+{% load pa_bonus_extras %}
+
+{% block title %}
+  {% if request.status == 'DRAFT' %}
+    Potvrzení žádosti o čerpání
+  {% else %}
+    Detail žádosti o čerpání
+  {% endif %}
+{% endblock title %}
+
+{% block content %}
+  {% if request.status == 'DRAFT' %}
+    <h1>Potvrzení žádosti o čerpání</h1>
+    <div class="intro-text">
+      <p>Zkontrolujte, prosím, níže uvedené informace a pokud jsou správné, žádost potvrďte tlačítkem ve spodní části stránky.</p>
+    </div>
+  {% else %}
+    <h1>Detail žádosti o čerpání</h1>
+    <div class="intro-text">
+      <p>Níže najdete informace o odeslané žádosti o bonus v rámci programu.</p>
+    </div>
+  {% endif %}
+
+  <p>Uživatel: {{ request.user.username }}</p>
+  <p>Datum žádosti: {{ request.requested_at|czech_date }}</p>
+  <p>Celková hodnota: {{ request.total_points }} bodů</p>
+
+  <h2>Položky:</h2>
+  <ul>
+    {% for item in items %}
+      <li>
+        {{ item.quantity }} x {{ item.reward.name }} ({{ item.point_cost }} bodů / ks) = {{ item.quantity|multiply:item.point_cost }} bodů celkem
+      </li>
+    {% endfor %}
+  </ul>
+
+  {% if request.status == 'DRAFT' %}
+    <p>Vaše dostupné body: {{ user_balance }}</p>
+    {% if request.total_points <= user_balance %}
+        <form method="post">
+          {% csrf_token %}
+          
+          <div class="form-group">
+            <label for="customer_note"><strong>Poznámka k žádosti:</strong></label>
+            <textarea name="customer_note" id="customer_note" rows="4" style="width: 100%;">{{ request.note }}</textarea>
+            <p class="help-text">Zde můžete uvést doručovací adresu (pokud se liší od vaší registrované adresy), 
+            preferovaný termín dodání nebo jakékoliv další požadavky týkající se vaší objednávky.</p>
+          </div>
+          
+          <button class="submit-button" type="submit">Potvrdit žádost o odměnu</button>
+        </form>
+    {% else %}
+        <p>Pro odeslání žádosti nemáte k dispozici dostatek bodů.</p>
+    {% endif %}
+{% else %}
+    {% if request.note %}
+    <h2>Poznámka k žádosti:</h2>
+    <div class="note-container">
+      {{ request.note }}
+    </div>
+    {% endif %}
+    
+    {% if request.description %}
+    <h2>Poznámky od manažera:</h2>
+    <div class="note-container">
+      {{ request.description }}
+    </div>
+    {% endif %}
+    
+    {% if request.status == 'PENDING' %}
+        <div class="status-info pending">
+            <h3>Stav žádosti: Čeká na potvrzení</h3>
+            <p>Vaše žádost byla odeslána a čeká na schválení manažerem. Obvyklá doba zpracování je 1-3 pracovní dny.</p>
+        </div>
+    {% elif request.status == 'ACCEPTED' %}
+        <div class="status-info accepted">
+            <h3>Stav žádosti: Schváleno</h3>
+            <p>Vaše žádost byla schválena a je připravena k distribuci. Odměny odesíláme na základě skladové dostupnosti.</p>
+            <p>V případě jakýchkoli dotazů kontaktujte svého obchodního zástupce.</p>
+        </div>
+    {% elif request.status == 'REJECTED' %}
+        <div class="status-info rejected">
+            <h3>Stav žádosti: Zamítnuto</h3>
+            <p>Vaše žádost byla bohužel zamítnuta. Důvod najdete v poznámkách od manažera výše.</p>
+            <p>Pro další informace kontaktujte svého obchodního zástupce nebo vytvořte novou žádost.</p>
+        </div>
+    {% elif request.status == 'FINISHED' %}
+        <div class="status-info finished">
+            <h3>Stav žádosti: Dokončeno</h3>
+            <p>Vaše žádost byla úspěšně dokončena a odměny byly odeslány. Děkujeme za využití našeho bonusového programu.</p>
+        </div>
+    {% elif request.status == 'CANCELLED' %}
+        <div class="status-info cancelled">
+            <h3>Stav žádosti: Zrušeno</h3>
+            <p>Tato žádost byla zrušena. Vaše body byly vráceny na váš bodový účet.</p>
+            <p>Pro vytvoření nové žádosti se vraťte do <a href="{% url 'rewards' %}">sekce odměn</a>.</p>
+        </div>
+    {% endif %}
+{% endif %}
+
+  <style>
+    .hidden{
+      display: none;
+    }
+    .note-container {
+      background-color: var(--neutral-bg);
+      padding: 1rem;
+      border-radius: var(--border-radius-md);
+      margin-bottom: 1.5rem;
+    }
+    .help-text {
+      font-size: 0.85rem;
+      color: #666;
+      margin-top: 0.25rem;
+    }
+  </style>
+{% endblock %}

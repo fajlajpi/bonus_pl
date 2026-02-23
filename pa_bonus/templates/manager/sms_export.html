@@ -1,0 +1,150 @@
+{% extends "base.html" %}
+{% block title %} SMS Export {% endblock %}
+
+{% block content %}
+<div class="sms-export-container">
+  <h2>Export SMS Notifications</h2>
+  
+  <div class="intro-text">
+    <p>Zde můžete vytvořit CSV soubor pro hromadné SMS notifikace přes smsbrana.cz.</p>
+    <p>Klientům bude odeslána informace o aktuálním stavu jejich bodového konta.</p>
+  </div>
+  
+  <div class="export-form-container">
+    <form method="post" class="sms-export-form">
+      {% csrf_token %}
+      
+      <div class="form-group">
+        <label for="region">Region (volitelné):</label>
+        <select name="region" id="region">
+          <option value="all">Všechny regiony</option>
+          {% for region in regions %}
+            <option value="{{ region.id }}">{{ region.name }}</option>
+          {% endfor %}
+        </select>
+      </div>
+      
+      <div class="form-group">
+        <label for="min_points">Minimální počet bodů:</label>
+        <input type="number" name="min_points" id="min_points" value="0" min="0" class="form-control">
+        <small>Zadejte 0 pro export všech klientů bez ohledu na body.</small>
+      </div>
+      
+      <div class="form-group">
+        <label>Typ zprávy:</label>
+        <div class="radio-options">
+          <div class="radio-option">
+            <input type="radio" id="default_message" name="message_type" value="default" checked>
+            <label for="default_message">Standardní zpráva o bodech</label>
+          </div>
+          <div class="radio-option">
+            <input type="radio" id="custom_message" name="message_type" value="custom">
+            <label for="custom_message">Vlastní zpráva</label>
+          </div>
+        </div>
+      </div>
+      
+      <div class="form-group" id="message_preview_container">
+        <label>Ukázka standardní zprávy:</label>
+        <div class="sms-preview">
+          <div class="sms-text" id="default_preview">
+            OS: Bonus Primavera Andorrana - na konte mate {počet bodů} bodu. Cerpani a informace: https://bonus.primavera-and.cz/ Odhlaseni: SMS STOP na +420778799900.
+          </div>
+        </div>
+      </div>
+      
+      <div class="form-group" id="custom_message_container" style="display: none;">
+        <label for="custom_message_text">Vlastní text zprávy:</label>
+        <textarea name="custom_message_text" id="custom_message_text" rows="4" class="form-control" placeholder="Zadejte vlastní text zprávy...">OS: Bonus Primavera Andorrana - na konte mate {balance} bodu. Cerpani a informace: https://bonus.primavera-and.cz/ Odhlaseni: SMS STOP na +420778799900.</textarea>
+        <div class="character-counter">
+          <span id="char_count">0</span> / 157 znaků (bez dosazení proměnných!)
+          <span id="message_count" class="message-count">1</span> zpráva
+        </div>
+        <div class="variables-help">
+          <p>Můžete použít následující proměnné:</p>
+          <ul>
+            <li><code>{balance}</code> - aktuální stav bodů klienta</li>
+            <li><code>{first_name}</code> - jméno klienta</li>
+            <li><code>{last_name}</code> - příjmení klienta</li>
+            <li><code>{user_name}</code> - uživatelské jméno klienta</li>
+            <li><code>{user_number}</code> - zákaznické číslo klienta</li>
+            <li><code>{user_email}</code> - email klienta</li>
+            <li><code>{user_phone}</code> - telefonní číslo klienta</li>
+            <li><code>{region}</code> - název regionu klienta</li>
+          </ul>
+        </div>
+      </div>
+      
+      <div class="export-actions">
+        <button type="submit" class="submit-button">Vytvořit SMS Export</button>
+      </div>
+    </form>
+  </div>
+  
+  <div class="export-instructions">
+    <h3>Jak použít export</h3>
+    <ol>
+      <li>Klikněte na tlačítko "Vytvořit SMS Export" pro stažení CSV souboru.</li>
+      <li>Přihlaste se do svého účtu na <a href="https://www.smsbrana.cz/" target="_blank">smsbrana.cz</a>.</li>
+      <li>Nahrajte CSV soubor dle instrukcí portálu.</li>
+      <li>Zkontrolujte a potvrďte odeslání SMS zpráv.</li>
+    </ol>
+  </div>
+</div>
+
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    const messageTypeRadios = document.getElementsByName('message_type');
+    const customMessageContainer = document.getElementById('custom_message_container');
+    const messagePreviewContainer = document.getElementById('message_preview_container');
+    const customMessageText = document.getElementById('custom_message_text');
+    const charCount = document.getElementById('char_count');
+    const messageCount = document.getElementById('message_count');
+    
+    // Function to count characters and update counter
+    function updateCharacterCount() {
+      // Remove variables from the count as they will be replaced
+      let text = customMessageText.value;
+      let textWithoutVars = text.replace(/{balance}|{first_name}|{last_name}/g, '');
+      let length = textWithoutVars.length;
+      
+      charCount.textContent = length;
+      
+      // Calculate number of messages (160 chars per message)
+      let msgCount = Math.ceil(length / 160);
+      messageCount.textContent = msgCount;
+      
+      // Visual feedback based on length
+      if (length > 160) {
+        charCount.classList.add('over-limit');
+      } else {
+        charCount.classList.remove('over-limit');
+      }
+    }
+    
+    // Handle radio button changes
+    messageTypeRadios.forEach(radio => {
+      radio.addEventListener('change', function() {
+        if (this.value === 'custom') {
+          customMessageContainer.style.display = 'block';
+          messagePreviewContainer.style.display = 'none';
+          updateCharacterCount(); // Update counter when switching to custom
+        } else {
+          customMessageContainer.style.display = 'none';
+          messagePreviewContainer.style.display = 'block';
+        }
+      });
+    });
+    
+    // Listen for input in the textarea
+    customMessageText.addEventListener('input', updateCharacterCount);
+    
+    // Initialize based on default selection
+    if (document.getElementById('custom_message').checked) {
+      customMessageContainer.style.display = 'block';
+      messagePreviewContainer.style.display = 'none';
+      updateCharacterCount(); // Initial count
+    }
+  });
+</script>
+{% endblock %}

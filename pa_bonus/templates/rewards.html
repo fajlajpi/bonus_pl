@@ -1,0 +1,138 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block title %} Nabídka odměn {% endblock title %}
+{% block content %}
+  <h1>Dostupné odměny:</h1>
+  <div class="points-summary">
+    <h3>Aktuální stav bodového konta</h3>
+    <p class="total-points">{{ user_balance }} bodů</p>
+  </div>
+  <div class="intro-text">
+    <p>Nabídka Bonusového programu se může měnit v závislosti na dostupnosti odměn u nás i u dodavatelů. Odměny označené
+      <span class="availability-badge available">skladem</span> máme obvykle na skladě
+    Odměny označené <span class="availability-badge on_demand">na objednání</span> objednáváme až na základě Vaší žádosti.</p>
+    <p>V případě dotazů nás kontaktujte na emailu <a href="mailto:support@bonus.primavera-and.cz">support@bonus.primavera-and.cz</a>, 
+      nebo se obraťte na svého obchodního zástupce.</p>
+    <p>V současnosti dokončujeme nahrání kompletní nabídky, některé odměny tak stále ještě chybí.</p>
+  </div>
+  <form method="post">
+    {% csrf_token %}
+{% if rewards %}
+  <div class="table-container">
+    <table class="rewards-table">
+      <thead>
+        <tr>
+          <th class="reward-image-col">Produkt</th>
+          <th class="reward-info-col">Informace</th>
+          <th class="reward-cost-col">Body</th>
+          <th class="reward-status-col">Dostupnost</th>
+          <th class="reward-quantity-col">Množství</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for reward in rewards %}
+          <tr>
+            <td class="reward-image-cell">
+              {% if reward.image %}
+                <img src="{{ reward.image.url }}" alt="{{ reward.name }}" class="reward-image">
+              {% else %}
+                <img src="{% static 'images/default.png' %}" alt="Default Image" class="reward-image">
+              {% endif %}
+            </td>
+            <td class="reward-info-cell">
+              <h3 class="reward-name">{{ reward.name }}</h3>
+              <p class="reward-description">{{ reward.description }}</p>
+              <div class="reward-metadata">
+                <span class="reward-code">Kód: {{ reward.abra_code }}</span>
+              </div>
+            </td>
+            <td class="reward-cost-cell">
+              <div class="point-cost">{{ reward.point_cost }}</div>
+              <div>bodů</div>
+            </td>
+            <td class="reward-status-cell">
+              <span class="availability-badge {{ reward.availability|lower }}">
+                {% if reward.availability == 'AVAILABLE' %}
+                  Skladem
+                {% elif reward.availability == 'AVAILABLE_LAST_UNITS' %}
+                  Skladem poslední kusy
+                {% elif reward.availability == 'ON_DEMAND' %}
+                  Na objednání
+                {% elif reward.availability == 'UNAVAILABLE' %}
+                  Nedostupné
+                {% endif %}
+              </span>
+            </td>
+            <td class="reward-quantity-cell">
+              {% if reward.availability != 'UNAVAILABLE' %}
+                <div class="quantity-input">
+                  <input class="reward-input" type="number" name="reward_quantity_{{ reward.id }}" id="reward_quantity_{{ reward.id }}" value="0" min="0" 
+                         {% if reward.availability == 'UNAVAILABLE' %}disabled{% endif %}>
+                </div>
+              {% else %}
+                <div class="quantity-input">
+                  <input class="reward-input" type="number" name="reward_quantity_{{ reward.id }}" id="reward_quantity_{{ reward.id }}" value="0" min="0" disabled>
+                </div>
+              {% endif %}
+            </td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+
+  <!-- Live summary of total point cost -->
+  <div id="live-total-container" class="points-summary" style="margin-top: 2rem;">
+    <h3>Celková hodnota žádosti</h3>
+    <span class="total-points" id="live-total">0 bodů</span> <span class="total-points">/ {{ user_balance }} k dispozici</span>
+    <p id="point-warning" style="display:none; color: var(--error-color); font-weight: bold;">Překročili jste stav bodového konta!</p>
+  </div>
+  
+  <button id="submit-button" class="submit-button" type="submit">Vytvořit žádost o odměny</button>
+{% else %}
+  <p>V tuto chvíli nejsou dostupné žádné odměny.</p>
+{% endif %}
+  </form>
+  <script>
+    document.addEventListener('DOMContentLoaded', function () {
+      const inputs = document.querySelectorAll('.reward-input');
+      const totalDisplay = document.getElementById('live-total');
+      const warningText = document.getElementById('point-warning');
+      const submitButton = document.getElementById('submit-button');
+  
+      const userBalance = {{ user_balance|default:0 }};  // Injected from Django context
+      let currentTotal = 0;
+  
+      function calculateTotal() {
+        currentTotal = 0;
+        inputs.forEach(input => {
+          if (!input.disabled) {
+            const quantity = parseInt(input.value) || 0;
+            const pointCost = parseInt(input.closest('tr').querySelector('.point-cost').textContent);
+            currentTotal += quantity * pointCost;
+          }
+        });
+  
+        totalDisplay.textContent = currentTotal + ' bodů';
+  
+        if (currentTotal > userBalance) {
+          warningText.style.display = 'block';
+          submitButton.disabled = true;
+          submitButton.style.opacity = 0.6;
+          submitButton.style.pointerEvents = 'none';
+        } else {
+          warningText.style.display = 'none';
+          submitButton.disabled = false;
+          submitButton.style.opacity = 1;
+          submitButton.style.pointerEvents = 'auto';
+        }
+      }
+  
+      inputs.forEach(input => {
+        input.addEventListener('input', calculateTotal);
+      });
+  
+      calculateTotal();  // initialize on load
+    });
+  </script>
+{% endblock %}

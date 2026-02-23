@@ -1,0 +1,36 @@
+{% extends "base.html" %}
+
+{% block title %} Upload invoice data {% endblock title %}
+
+{% block content %}
+<div class="upload-container">
+    <h2>Upload Transaction File</h2>
+    
+    <form method="post" enctype="multipart/form-data">
+        {% csrf_token %}
+        
+        {% if form.errors %}
+        <div class="alert alert-danger">
+            Please correct the errors below.
+        </div>
+        {% endif %}
+        
+        <div class="form-group">
+            {{ form.file.label_tag }}
+            {{ form.file }}
+            {% if form.file.errors %}
+            <div class="error-feedback">
+                {{ form.file.errors }}
+            </div>
+            {% endif %}
+        </div>
+        
+        <div class="help-text">
+            <p>Accepted formats: .xlsx, .xls, .csv</p>
+            <p>Maximum file size: 15MB</p>
+        </div>
+        
+        <button type="submit" class="btn btn-primary">Upload</button>
+    </form>
+</div>
+{% endblock %}
