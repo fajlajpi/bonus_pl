@@ -3,66 +3,65 @@
 
 {% block title %}
   {% if request.status == 'DRAFT' %}
-    Potvrzení žádosti o čerpání
+  Potwierdzenie wniosku o realizację
   {% else %}
-    Detail žádosti o čerpání
+  Szczegóły wniosku o realizację
   {% endif %}
 {% endblock title %}
 
 {% block content %}
   {% if request.status == 'DRAFT' %}
-    <h1>Potvrzení žádosti o čerpání</h1>
+    <h1>Potwierdzenie wniosku o realizację</h1>
     <div class="intro-text">
-      <p>Zkontrolujte, prosím, níže uvedené informace a pokud jsou správné, žádost potvrďte tlačítkem ve spodní části stránky.</p>
+      <p>Sprawdź poniższe informacje i jeśli są poprawne, potwierdź wniosek przyciskiem na dole strony.</p>
     </div>
   {% else %}
-    <h1>Detail žádosti o čerpání</h1>
+    <h1>Szczegóły wniosku o realizację</h1>
     <div class="intro-text">
-      <p>Níže najdete informace o odeslané žádosti o bonus v rámci programu.</p>
+      <p>Poniżej znajdziesz informacje o złożonym wniosku o bonus w ramach programu.</p>
     </div>
   {% endif %}
 
-  <p>Uživatel: {{ request.user.username }}</p>
-  <p>Datum žádosti: {{ request.requested_at|czech_date }}</p>
-  <p>Celková hodnota: {{ request.total_points }} bodů</p>
+  <p>Użytkownik: {{ request.user.username }}</p>
+  <p>Data wniosku: {{ request.requested_at|czech_date }}</p>
+  <p>Łączna wartość: {{ request.total_points }} bodů</p>
 
-  <h2>Položky:</h2>
+  <h2>Pozycje:</h2>
   <ul>
     {% for item in items %}
       <li>
-        {{ item.quantity }} x {{ item.reward.name }} ({{ item.point_cost }} bodů / ks) = {{ item.quantity|multiply:item.point_cost }} bodů celkem
+        {{ item.quantity }} x {{ item.reward.name }} ({{ item.point_cost }} pkt / szt.) = {{ item.quantity|multiply:item.point_cost }} pkt łącznie
       </li>
     {% endfor %}
   </ul>
 
   {% if request.status == 'DRAFT' %}
-    <p>Vaše dostupné body: {{ user_balance }}</p>
+    <p>Twoje dostępne punkty: {{ user_balance }}</p>
     {% if request.total_points <= user_balance %}
         <form method="post">
           {% csrf_token %}
           
           <div class="form-group">
-            <label for="customer_note"><strong>Poznámka k žádosti:</strong></label>
+            <label for="customer_note"><strong>Uwagi do wniosku:</strong></label>
             <textarea name="customer_note" id="customer_note" rows="4" style="width: 100%;">{{ request.note }}</textarea>
-            <p class="help-text">Zde můžete uvést doručovací adresu (pokud se liší od vaší registrované adresy), 
-            preferovaný termín dodání nebo jakékoliv další požadavky týkající se vaší objednávky.</p>
+            <p class="help-text">Tutaj możesz podać adres dostawy (jeśli jest inny niż adres rejestrowy), preferowany termin dostawy lub inne uwagi dotyczące zamówienia.</p>
           </div>
           
-          <button class="submit-button" type="submit">Potvrdit žádost o odměnu</button>
+          <button class="submit-button" type="submit">Potwierdź wniosek o nagrodę</button>
         </form>
     {% else %}
-        <p>Pro odeslání žádosti nemáte k dispozici dostatek bodů.</p>
+        <p>Nie masz wystarczającej liczby punktów, aby złożyć wniosek.</p>
     {% endif %}
 {% else %}
     {% if request.note %}
-    <h2>Poznámka k žádosti:</h2>
+    <h2>Uwagi do wniosku:</h2>
     <div class="note-container">
       {{ request.note }}
     </div>
     {% endif %}
     
     {% if request.description %}
-    <h2>Poznámky od manažera:</h2>
+    <h2>Uwagi od menedżera:</h2>
     <div class="note-container">
       {{ request.description }}
     </div>
@@ -70,31 +69,31 @@
     
     {% if request.status == 'PENDING' %}
         <div class="status-info pending">
-            <h3>Stav žádosti: Čeká na potvrzení</h3>
-            <p>Vaše žádost byla odeslána a čeká na schválení manažerem. Obvyklá doba zpracování je 1-3 pracovní dny.</p>
+            <h3>Status wniosku: Oczekuje na potwierdzenie</h3>
+            <p>Twój wniosek został wysłany i oczekuje na zatwierdzenie przez menedżera. Standardowy czas przetwarzania to 1–3 dni robocze.</p>
         </div>
     {% elif request.status == 'ACCEPTED' %}
         <div class="status-info accepted">
-            <h3>Stav žádosti: Schváleno</h3>
-            <p>Vaše žádost byla schválena a je připravena k distribuci. Odměny odesíláme na základě skladové dostupnosti.</p>
-            <p>V případě jakýchkoli dotazů kontaktujte svého obchodního zástupce.</p>
+            <h3>Status wniosku: Zatwierdzony</h3>
+            <p>Twój wniosek został zatwierdzony i jest gotowy do realizacji. Nagrody wysyłamy w zależności od dostępności magazynowej.</p>
+            <p>W razie pytań skontaktuj się ze swoim opiekunem handlowym.</p>
         </div>
     {% elif request.status == 'REJECTED' %}
         <div class="status-info rejected">
-            <h3>Stav žádosti: Zamítnuto</h3>
-            <p>Vaše žádost byla bohužel zamítnuta. Důvod najdete v poznámkách od manažera výše.</p>
-            <p>Pro další informace kontaktujte svého obchodního zástupce nebo vytvořte novou žádost.</p>
+            <h3>Status wniosku: Odrzucony</h3>
+            <p>Niestety Twój wniosek został odrzucony. Powód znajdziesz w uwagach od menedżera powyżej.</p>
+            <p>Aby uzyskać więcej informacji, skontaktuj się ze swoim opiekunem handlowym lub złóż nowy wniosek.</p>
         </div>
     {% elif request.status == 'FINISHED' %}
         <div class="status-info finished">
-            <h3>Stav žádosti: Dokončeno</h3>
-            <p>Vaše žádost byla úspěšně dokončena a odměny byly odeslány. Děkujeme za využití našeho bonusového programu.</p>
+            <h3>Status wniosku: Zrealizowany</h3>
+            <p>Twój wniosek został pomyślnie zrealizowany, a nagrody zostały wysłane. Dziękujemy za korzystanie z naszego programu bonusowego.</p>
         </div>
     {% elif request.status == 'CANCELLED' %}
         <div class="status-info cancelled">
-            <h3>Stav žádosti: Zrušeno</h3>
-            <p>Tato žádost byla zrušena. Vaše body byly vráceny na váš bodový účet.</p>
-            <p>Pro vytvoření nové žádosti se vraťte do <a href="{% url 'rewards' %}">sekce odměn</a>.</p>
+            <h3>Status wniosku: Anulowany</h3>
+            <p>Ten wniosek został anulowany. Twoje punkty zostały zwrócone na konto punktowe.</p>
+            <p>Aby złożyć nowy wniosek, wróć do <a href="{% url 'rewards' %}">sekcji nagród</a>.</p>
         </div>
     {% endif %}
 {% endif %}

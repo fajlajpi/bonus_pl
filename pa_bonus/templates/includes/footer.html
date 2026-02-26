@@ -2,13 +2,13 @@
 <footer class="site-footer">
     <div class="footer-content">
         <div class="footer-info">
-            <p>&copy; {{ current_year }} Primavera Andorrana. All rights reserved.</p>
+            <p>&copy; {{ current_year }} Primavera Andorrana. Wszelkie prawa zastrzeżone.</p>
         </div>
         <div class="footer-links">
-            <a href="{% url 'home_redirect' %}">Hlavní stránka</a>
-            <a href="{% url 'public_catalogue' %}">Katalog odměn</a>
-            <a href="{% url 'privacy_policy' %}">Zásady ochrany osobních údajů</a>
-            <a href="{% url 'contact' %}">Kontaktní informace</a>
+            <a href="{% url 'home_redirect' %}">Strona główna</a>
+            <a href="{% url 'public_catalogue' %}">Katalog nagród</a>
+            <a href="{% url 'privacy_policy' %}">Polityka prywatności</a>
+            <a href="{% url 'contact' %}">Dane kontaktowe</a>
             {% if user.is_staff %}
                 <a href="{% url 'admin:index' %}">Admin Panel</a>
             {% endif %}

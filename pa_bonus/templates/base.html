@@ -4,13 +4,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Bonusový program - {% block title %}Vítejte{% endblock %}</title>
+    <title>Program bonusowy - {% block title %}Witamy{% endblock %}</title>
     <link rel="stylesheet" href="{% static 'style.css' %}">
 </head>
 <body>
     <header class="site-header">
         <div class="header-content">
-            <a href="{% url 'dashboard' %}" class="site-title">Bonusový program</a>
+            <a href="{% url 'dashboard' %}" class="site-title">Program bonusowy</a>
             <nav class="user-nav">
                 {% if user.is_authenticated %}
                     Přihlášen jako <em>{{ user.username }}</em>
@@ -21,13 +21,13 @@
                         <a href="{% url 'salesrep_dashboard' %}">Sales Rep</a>
                         <a href="{% url 'salesrep_clients' %}">My Clients</a>
                     {% endif %}
-                    <a href="{% url 'dashboard' %}">Přehled</a>
+                    <a href="{% url 'dashboard' %}">Przegląd</a>
                     <form action="{% url 'logout' %}" method="post">
                         {% csrf_token %}
-                        <button type="submit">Odhlásit</button>
+                        <button type="submit">Wyloguj się</button>
                     </form>
                 {% else %}
-                    <a href="{% url 'login' %}">Přihlásit se</a>
+                    <a href="{% url 'login' %}">Zaloguj się</a>
                 {% endif %}
             </nav>
         </div>

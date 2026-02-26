@@ -1,38 +1,38 @@
 {% extends "base.html" %}
 {% load pa_bonus_extras %}
 
-{% block title %} Detail transakce {% endblock title %}
+{% block title %} Szczegóły transakcji {% endblock title %}
 
 {% block content %}
 <div class="transaction-detail-container">
-    <h2>Podrobnosti bodové transakce</h2>
+    <h2>Szczegóły transakcji punktowych</h2>
     
     <div class="transaction-info">
-        <p><strong>Datum:</strong> {{ transaction.date|czech_date }}</p>
+        <p><strong>Data:</strong> {{ transaction.date|czech_date }}</p>
         
         {% if transaction.brand %}
-        <p><strong>Značka:</strong> {{ transaction.brand.name }}</p>
+        <p><strong>Ocena:</strong> {{ transaction.brand.name }}</p>
         {% endif %}
         
-        <p><strong>Bodů:</strong> <span class="value {% if transaction.value < 0 %}negative{% else %}positive{% endif %}">{{ transaction.value }} bodů</span></p>
+        <p><strong>Zwrotnica:</strong> <span class="value {% if transaction.value < 0 %}negative{% else %}positive{% endif %}">{{ transaction.value }} pkt</span></p>
         
         <p><strong>Typ:</strong> 
             {% if transaction.type == 'STANDARD_POINTS' %}
-                Standardní připsání bodů
+                Standardowe naliczenie punktów
             {% elif transaction.type == 'REWARD_CLAIM' %}
-                <a href="{% url 'rewards_request_detail' transaction.reward_request.id %}">Žádost o odměnu</a>
+                <a href="{% url 'rewards_request_detail' transaction.reward_request.id %}">Wniosek o nagrodę</a>
             {% elif transaction.type == 'CREDIT_NOTE_ADJUST' %}
-                Korekce dobropisu
+                Korekta faktury korygującej
             {% elif transaction.type == 'ADJUSTMENT' %}
-                Manuální korekce
+                Korekta ręczna
             {% else %}
                 {{ transaction.get_type_display }}
             {% endif %}
         </p>
         {% if transaction.type == 'REWARD_CLAIM' %}
         <div class="intro-text">
-            <p>Stav <span class="status-badge confirmed">Potvrzeno</span> znamená, že jsme body vyblokovali, ale samotná žádost o čerpání může ještě čekat na zpracování.
-                Podrobnosti najdete v <a href="{% url 'rewards_request_detail' transaction.reward_request.id %}">detailu žádosti o odměnu</a>.
+            <p>Status <span class="status-badge confirmed">Potwierdzony</span> znacza, że zablokowaliśmy punkty,
+                 ale samo żądanie wypłaty może nadal oczekiwać na przetworzenie. <a href="{% url 'rewards_request_detail' transaction.reward_request.id %}">Szczegóły znajdziesz tutaj.</a>
             </p>
         </div>
         {% endif %}
@@ -41,26 +41,25 @@
         <p><strong>Stav:</strong>
             <span class="status-badge {{ transaction.status|lower }}">
                 {% if transaction.status == 'PENDING' %}
-                    Čeká na potvrzení
+                    Oczekuje na potwierdzenie
                 {% elif transaction.status == 'CONFIRMED' %}
-                    Potvrzeno
+                    Potwierdzone
                 {% elif transaction.status == 'CANCELLED' %}
-                    Zrušeno
+                    Anulowane
                 {% elif transaction.status == 'NO-CONTRACT' %}
-                    Transakce bez smlouvy
+                    Transakcja bez umowy
                 {% else %}
                     {{ transaction.get_status_display }}
                 {% endif %}
             </span>
         </p>
         
-        <p><strong>Popis:</strong> {{ transaction.description }}</p>
+        <p><strong>Opis::</strong> {{ transaction.description }}</p>
         
         {% if transaction.invoice %}
         <p><strong>Faktura:</strong> {{ transaction.invoice.invoice_number }} ({{ transaction.invoice.invoice_date|czech_date }})</p>
         {% endif %}
     </div>
-    
-    <a href="{% url 'history' %}" class="back-link">Zpět na seznam transakcí</a>
+    <a href="{% url 'history' %}" class="back-link">Powrót do listy transakcji</a>
 </div>
 {% endblock %}

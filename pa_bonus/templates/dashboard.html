@@ -1,35 +1,35 @@
 {% extends "base.html" %}
 {% load pa_bonus_extras %}
 
-{% block title %} Přehled {% endblock title %}
+{% block title %} Przegląd {% endblock title %}
 
 {% block content %}
 <div class="dashboard-container">
-    <h2>Přehled bonusového programu pro: {{ user.first_name }} {{ user.last_name }}</h2>
+    <h2>Przegląd programu bonusowego dla: {{ user.first_name }} {{ user.last_name }}</h2>
     
     <div class="points-summary">
-        <h3>Aktuální stav bodového konta</h3>
-        <p class="total-points">{{ total_points }} bodů</p>
+        <h3>Aktualny stan konta punktowego</h3>
+        <p class="total-points">{{ total_points }} pkt</p>
     </div>
 
     {% if contract %}
     <div class="contract-details dashboard-section">
-        <h3>Bonusy za značky</h3>
+        <h3>Bonusy za marki</h3>
         <ul>
         {% for bonus in brand_bonuses %}
-            <li><strong>{{ bonus.brand_id.name }}</strong>: 500 PLN fakturace bez DPH na 1 bod</li>
+            <li><strong>{{ bonus.brand_id.name }}</strong>: 500 PLN obrotu netto (bez VAT) za 1 punkt</li>
         {% endfor %}
     </div>
     {% else %}
-    <p>Bez aktivních členství.</p>
+    <p>Brak aktywnych członkostw.</p>
     {% endif %}
 
     <div class="quick-links">
-        <h3>Rychlé odkazy</h3>
+        <h3>Szybkie linki</h3>
         <ul>
-            <li><a href="{% url 'history' %}">Historie bodových transakcí</a></li>
-            <li><a href="{% url 'rewards' %}">Nabídka odměn</a></li>
-            <li><a href="{% url 'reward_requests' %}">Žádosti o čerpání odměn</a></li>
+            <li><a href="{% url 'history' %}">Historia transakcji punktowych</a></li>
+            <li><a href="{% url 'rewards' %}">Oferta nagród</a></li>
+            <li><a href="{% url 'reward_requests' %}">Wnioski o realizację nagród</a></li>
         </ul>
     </div>
 </div>

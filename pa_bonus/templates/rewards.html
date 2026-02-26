@@ -1,19 +1,19 @@
 {% extends 'base.html' %}
 {% load static %}
-{% block title %} Nabídka odměn {% endblock title %}
+{% block title %} Oferta nagród {% endblock title %}
 {% block content %}
-  <h1>Dostupné odměny:</h1>
+  <h1>Dostępne nagrody:</h1>
   <div class="points-summary">
-    <h3>Aktuální stav bodového konta</h3>
-    <p class="total-points">{{ user_balance }} bodů</p>
+    <h3>Aktualny stan konta punktowego</h3>
+    <p class="total-points">{{ user_balance }} pkt</p>
   </div>
   <div class="intro-text">
-    <p>Nabídka Bonusového programu se může měnit v závislosti na dostupnosti odměn u nás i u dodavatelů. Odměny označené
-      <span class="availability-badge available">skladem</span> máme obvykle na skladě
-    Odměny označené <span class="availability-badge on_demand">na objednání</span> objednáváme až na základě Vaší žádosti.</p>
-    <p>V případě dotazů nás kontaktujte na emailu <a href="mailto:support@bonus.primavera-and.cz">support@bonus.primavera-and.cz</a>, 
-      nebo se obraťte na svého obchodního zástupce.</p>
-    <p>V současnosti dokončujeme nahrání kompletní nabídky, některé odměny tak stále ještě chybí.</p>
+    <p>Oferta Programu Bonusowego może ulegać zmianom w zależności od dostępności nagród u nas i u dostawców. Nagrody oznaczone 
+      <span class="availability-badge available">sklaw magazynie</span> są zazwyczaj dostępne od ręki. Nagrody oznaczone
+    <span class="availability-badge on_demand">na zamówienie</span> zamawiamy dopiero na podstawie Twojego wniosku.</p>
+    <p>W razie pytań skontaktuj się z nami e-mailem <a href="mailto:support@bonus.primavera-and.cz">bonus@primavera-and.cz</a>, 
+      lub zwróć się do swojego opiekuna handlowego.</p>
+    <p>Obecnie finalizujemy dodawanie pełnej oferty — niektórych nagród może jeszcze brakować.</p>
   </div>
   <form method="post">
     {% csrf_token %}
@@ -23,10 +23,10 @@
       <thead>
         <tr>
           <th class="reward-image-col">Produkt</th>
-          <th class="reward-info-col">Informace</th>
-          <th class="reward-cost-col">Body</th>
-          <th class="reward-status-col">Dostupnost</th>
-          <th class="reward-quantity-col">Množství</th>
+          <th class="reward-info-col">Informacje</th>
+          <th class="reward-cost-col">Punkty</th>
+          <th class="reward-status-col">Dostępność</th>
+          <th class="reward-quantity-col">Ilość</th>
         </tr>
       </thead>
       <tbody>
@@ -43,23 +43,23 @@
               <h3 class="reward-name">{{ reward.name }}</h3>
               <p class="reward-description">{{ reward.description }}</p>
               <div class="reward-metadata">
-                <span class="reward-code">Kód: {{ reward.abra_code }}</span>
+                <span class="reward-code">Kod: {{ reward.abra_code }}</span>
               </div>
             </td>
             <td class="reward-cost-cell">
               <div class="point-cost">{{ reward.point_cost }}</div>
-              <div>bodů</div>
+              <div>pkt</div>
             </td>
             <td class="reward-status-cell">
               <span class="availability-badge {{ reward.availability|lower }}">
                 {% if reward.availability == 'AVAILABLE' %}
-                  Skladem
+                  W magazynie
                 {% elif reward.availability == 'AVAILABLE_LAST_UNITS' %}
-                  Skladem poslední kusy
+                  W magazynie — ostatnie sztuki
                 {% elif reward.availability == 'ON_DEMAND' %}
-                  Na objednání
+                  Na zamówienie
                 {% elif reward.availability == 'UNAVAILABLE' %}
-                  Nedostupné
+                  Niedostępne
                 {% endif %}
               </span>
             </td>
@@ -83,14 +83,14 @@
 
   <!-- Live summary of total point cost -->
   <div id="live-total-container" class="points-summary" style="margin-top: 2rem;">
-    <h3>Celková hodnota žádosti</h3>
-    <span class="total-points" id="live-total">0 bodů</span> <span class="total-points">/ {{ user_balance }} k dispozici</span>
-    <p id="point-warning" style="display:none; color: var(--error-color); font-weight: bold;">Překročili jste stav bodového konta!</p>
+    <h3>Łączna wartość wniosku</h3>
+    <span class="total-points" id="live-total">0 pkt</span> <span class="total-points">/ {{ user_balance }} dostępnych</span>
+    <p id="point-warning" style="display:none; color: var(--error-color); font-weight: bold;">Przekroczono stan konta punktowego!</p>
   </div>
   
-  <button id="submit-button" class="submit-button" type="submit">Vytvořit žádost o odměny</button>
+  <button id="submit-button" class="submit-button" type="submit">Złóż wniosek o nagrody</button>
 {% else %}
-  <p>V tuto chvíli nejsou dostupné žádné odměny.</p>
+  <p>W tej chwili nie ma żadnych dostępnych nagród.</p>
 {% endif %}
   </form>
   <script>

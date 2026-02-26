@@ -1,31 +1,29 @@
 {% extends "base.html" %}
 {% load pa_bonus_extras %}
 
-{% block title %} Historie transakcí {% endblock title %}
+{% block title %} Historia transakcji {% endblock title %}
 
 {% block content %}
 <div class="history-container">
-    <h2>Historie bodových transakcí</h2>
+    <h2>Historia transakcji punktowych</h2>
 
     {% if transactions %}
     <div class="intro-text">
-        <p>Níže naleznete seznam Vašich bodových transakcí v rámci Bonusového programu. Body připisujeme se zpožděním 3 měsíců (fakturace v lednu = připsání v dubnu),
-            abychom umožnili zpracování případných reklamací a dobropisů. Transakce do systému nahráváme vždy na začátku měsíce, neobjevují se ihned.
+        <p>Poniżej znajduje się lista Twoich transakcji punktowych w ramach Programu Bonusowego. Punkty naliczamy z 3-miesięcznym opóźnieniem (faktura ze stycznia = naliczenie w kwietniu), aby umożliwić rozpatrzenie ewentualnych reklamacji i korekt. Transakcje wprowadzamy do systemu zawsze na początku miesiąca — nie pojawiają się od razu.
         </p>
-        <p>Transakce, které už jsou v systému nahrané, ale čekají na uplynutí 3 měsíců, jsou označené <span class="status-badge pending">čeká na potvrzení</span>. Stav transakce
-            <span class="status-badge confirmed">potvrzeno</span> znamená, že jsme body připsali / strhli, ale samotná žádost o čerpání může ještě čekat na zpracování.
+        <p>Transakcje, które zostały już wprowadzone do systemu, ale oczekują na upływ 3 miesięcy, są oznaczone jako <span class="status-badge pending">oczekuje na potwierdzenie</span>. Status transakcji <span class="status-badge confirmed">potwierdzone</span> oznacza, że punkty zostały naliczone / odjęte, ale sam wniosek o realizację może jeszcze oczekiwać na przetworzenie.
         </p>
-        <p>Stav konkrétní žádosti zkontrolujte v sekci <a href="{% url 'reward_requests' %}">Žádosti o čerpání</a>.</p>
+        <p>Status konkretnego wniosku sprawdź w sekcji <a href="{% url 'reward_requests' %}">Wnioski o realizację</a>.</p>
       </div>
     <table class="transactions-table">
         <thead>
             <tr>
-                <th>Datum</th>
-                <th>Značka</th>
-                <th>Hodnota</th>
+                <th>Data</th>
+                <th>Marka</th>
+                <th>Wartość</th>
                 <th>Typ</th>
                 <th>Status</th>
-                <th>Detail</th>
+                <th>Szczegóły</th>
             </tr>
         </thead>
         <tbody>
@@ -34,25 +32,25 @@
                 <td>{{ transaction.date|czech_date }}</td>
                 <td>{{ transaction.brand.name }}</td>
                 <td class="value {% if transaction.value < 0 %}negative{% else %}positive{% endif %}">
-                    {{ transaction.value }} bodů
+                    {{ transaction.value }} pkt
                 </td>
                 <td>
                     {% if transaction.type == 'STANDARD_POINTS' %}
-                        Standardní připsání bodů
+                        Standardowe naliczenie punktów
                     {% elif transaction.type == 'REWARD_CLAIM' %}
-                        Žádost o odměnu
+                        Wniosek o nagrodę
                     {% elif transaction.type == 'CREDIT_NOTE_ADJUST' %}
-                        Korekce dobropisu
+                        Korekta faktury korygującej
                     {% elif transaction.type == 'ADJUSTMENT' %}
-                        Manuální korekce
+                        Korekta ręczna
                     {% endif %}
                 </td>
                 <td>
                     <span class="status-badge {{ transaction.status|lower }}">
                         {% if transaction.status == 'PENDING' %}
-                            Čeká na potvrzení
+                            Oczekuje na potwierdzenie
                         {% elif transaction.status == 'CONFIRMED' %}
-                            Potvrzeno
+                            Potwierdzone
                         {% elif transaction.status == 'CANCELLED' %}
                             Zrušeno
                         {% elif transaction.status == 'NO-CONTRACT' %}
@@ -61,14 +59,14 @@
                     </span>
                 </td>
                 <td>
-                    <a href="{% url 'history_detail' transaction.id %}" class="details-link">Detail</a>
+                    <a href="{% url 'history_detail' transaction.id %}" class="details-link">Szczegóły</a>
                 </td>
             </tr>
             {% endfor %}
         </tbody>
     </table>
     {% else %}
-    <p>Žádné transakce nenalezeny.</p>
+    <p>Nie znaleziono żadnych transakcji.</p>
     {% endif %}
 </div>
 {% endblock %}

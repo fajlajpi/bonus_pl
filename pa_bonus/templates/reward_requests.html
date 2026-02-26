@@ -1,42 +1,42 @@
 {% extends "base.html" %}
 {% load pa_bonus_extras %}
 
-{% block title %} Seznam žádostí o čerpání {% endblock title %}
+{% block title %} Lista wniosków o realizację {% endblock title %}
 
 {% block content %}
 <div class="history-container">
-    <h2>Žádosti o čerpání odměn</h2>
+    <h2>Wnioski o realizację nagród</h2>
 
     {% if reward_requests %}
     <table class="transactions-table">
         <thead>
             <tr>
-                <th>Datum</th>
-                <th>Hodnota</th>
+                <th>Data</th>
+                <th>Wartość</th>
                 <th>Status</th>
-                <th>Poznámka</th>
-                <th>Detail</th>
+                <th>Uwagi</th>
+                <th>Szczegóły</th>
             </tr>
         </thead>
         <tbody>
             {% for reward_request in reward_requests %}
             <tr>
                 <td>{{ reward_request.requested_at|czech_date }}</td>
-                <td>{{ reward_request.total_points }} bodů</td>
+                <td>{{ reward_request.total_points }} pkt</td>
                 <td>
                     <span class="status-badge {{ reward_request.status|lower }}">
                         {% if reward_request.status == 'DRAFT' %}
-                            Koncept
+                            Wersja robocza
                         {% elif reward_request.status == 'PENDING' %}
-                            Čeká na potvrzení
+                            Oczekuje na potwierdzenie
                         {% elif reward_request.status == 'ACCEPTED' %}
-                            Potvrzena
+                            Potwierdzone
                         {% elif reward_request.status == 'REJECTED' %}
-                            Odmítnuta
+                            Odrzucone
                         {% elif reward_request.status == 'FINISHED' %}
-                            Dokončena
+                            Zrealizowane
                         {% elif reward_request.status == 'CANCELLED' %}
-                            Zrušena
+                            Anulowane
                         {% endif %}
                     </span>
                 </td>
@@ -53,7 +53,7 @@
         </tbody>
     </table>
     {% else %}
-    <p>Žádné žádosti nenalezeny.</p>
+    <p>Nie znaleziono żadnych wniosków.</p>
     {% endif %}
 </div>
 

@@ -1,13 +1,12 @@
 {% extends "base.html" %}
 {% load static %}
-{% block title %} Katalog odměn {% endblock title %}
+{% block title %} Katalog nagród {% endblock title %}
 
 {% block content %}
 <div class="catalogue-container">
-  <h1>Katalog odměn</h1>
+  <h1>Katalog nagród</h1>
   <p class="catalogue-intro">
-    Prohlédněte si výběr z nabídky odměn, které můžete získat v našem bonusovém programu. 
-    Pro zjištění ceny a dostupnosti jednotlivých položek se prosím <a href="{% url 'login' %}">přihlaste</a> do vašeho účtu.
+    Zapoznaj się z wybranymi nagrodami, które możesz zdobyć w naszym programie bonusowym. Aby sprawdzić cenę i dostępność poszczególnych pozycji, prosimy się <a href="{% url 'login' %}">zalogować</a> na swoje konto.
   </p>
 
   {% if rewards %}
@@ -33,10 +32,10 @@
     </div>
     
     <div class="catalogue-cta">
-      <p>Pro získání těchto a mnoha dalších odměn se <a href="{% url 'login' %}">přihlaste</a> do bonusového programu nebo <a href="{% url 'contact' %}">kontaktujte</a> svého obchodního zástupce.</p>
+      <p>Aby uzyskać te i wiele innych nagród, dołącz do programu bonusowego lub <a href="{% url 'contact' %}">skontaktuj się</a> ze swoim opiekunem handlowym.</p>
     </div>
   {% else %}
-    <p>V tuto chvíli nejsou dostupné žádné odměny k zobrazení.</p>
+    <p>W tej chwili nie ma żadnych nagród do wyświetlenia.</p>
   {% endif %}
 </div>
 {% endblock %}
