@@ -1,7 +1,7 @@
 import os
 import sys
 
-path = '/home/iepgvjxg/bonus' # Absolute path
+path = '/home/iepgvjxg/bonus_pl' # Absolute path
 if path not in sys.path:
     sys.path.append(path)
 
