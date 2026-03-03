@@ -50,10 +50,6 @@ SECURE_BROWSER_XSS_FILTER = True
 SECURE_CONTENT_TYPE_NOSNIFF = True
 X_FRAME_OPTIONS = 'DENY'
 
-# Adjust SESSION cookie path so it doesn't interfere with other projects on the same domain
-SESSION_COOKIE_PATH = '/bonuspl/'
-CSRF_COOKIE_PATH = '/bonuspl/'
-
 # CSRF must know the full origin
 CSRF_TRUSTED_ORIGINS = [
     'https://primavera-and.pl',
