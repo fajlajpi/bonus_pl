@@ -59,6 +59,7 @@ CSRF_TRUSTED_ORIGINS = [
     'https://primavera-and.pl',
     'https://www.primavera-and.pl',
     'https://iepgvjxg.a2hosted.com',
+    'https://bonuspl.ffhh.cz/',
 ]
 
 # Django Q settings - adjust workers based on server capacity
