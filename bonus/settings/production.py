@@ -29,7 +29,7 @@ DATABASES = {
 }
 
 # I18N and TZ
-LANGUAGE_CODE = 'cs'
+LANGUAGE_CODE = 'pl'
 TIME_ZONE = 'Europe/Prague'
 
 
