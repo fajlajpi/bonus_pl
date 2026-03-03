@@ -125,7 +125,7 @@ LOGGING = {
 # This keeps everything INSIDE the project directory, no more escaping to public_html
 
 STATIC_URL = '/static_bonuspl/'
-STATIC_ROOT = '/home/iepgvjxg/public_html/static_bonuspl/'
+STATIC_ROOT = '/home/iepgvjxg/bonus_pl/static_bonuspl/'
 
 MEDIA_URL = '/media_bonuspl/'
-MEDIA_ROOT = '/home/iepgvjxg/public_html/media_bonuspl/'
+MEDIA_ROOT = '/home/iepgvjxg/bonus_pl/media_bonuspl/'
