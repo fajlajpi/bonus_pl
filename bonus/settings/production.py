@@ -3,6 +3,8 @@ import json
 import os
 from .base import *
 
+SILENCED_SYSTEM_CHECKS = ['models.W037']
+
 DEBUG = False
 SECRET_KEY = os.getenv('SECRET_KEY')
 
@@ -23,6 +25,9 @@ DATABASES = {
         'PASSWORD': os.getenv('DB_PASSWORD'),
         'HOST': os.getenv('DB_HOST', 'localhost'),
         'PORT': os.getenv('DB_PORT', '3306'),
+        'OPTIONS': {
+            'sql_mode': 'STRICT_TRANS_TABLES',
+        }
     }
 }
 
@@ -56,7 +61,7 @@ CSRF_COOKIE_PATH = '/bonuspl/'
 CSRF_TRUSTED_ORIGINS = [
     'https://primavera-and.pl',
     'https://www.primavera-and.pl',
-    'iepgvjxg.a2hosted.com',
+    'https://iepgvjxg.a2hosted.com',
 ]
 
 # Django Q settings - adjust workers based on server capacity
