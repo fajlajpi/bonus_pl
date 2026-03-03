@@ -102,17 +102,6 @@ class RegionRepAdmin(admin.ModelAdmin):
     search_fields = ('user__username', 'user__email', 'user__last_name', 'region__name')
     date_hierarchy = 'date_from'
     raw_id_fields = ('user',)
-    
-    def get_form(self, request, obj=None, **kwargs):
-        """
-        Customize the form to only show users in the Sales Reps group.
-        """
-        form = super().get_form(request, obj, **kwargs)
-        if 'user' in form.base_fields:
-            form.base_fields['user'].queryset = User.objects.filter(
-                groups__name='Sales Reps'
-            )
-        return form
 
 @admin.register(User)
 class UserAdmin(ImportExportMixin, BaseUserAdmin):
@@ -227,9 +216,6 @@ class InvoiceBrandTurnoverAdmin(admin.ModelAdmin):
 # TEST ADDITION, A BIT MESSY
 import csv
 import datetime
-from django.contrib import admin
-from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
-from django.contrib.auth.models import User
 from django.http import HttpResponse
 from django.db.models import Sum, Value, DecimalField
 from django.db.models.functions import Coalesce
