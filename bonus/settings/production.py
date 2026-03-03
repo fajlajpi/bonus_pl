@@ -6,9 +6,13 @@ from .base import *
 DEBUG = False
 SECRET_KEY = os.getenv('SECRET_KEY')
 
-ALLOWED_HOSTS = ['bonus.primavera-and.cz', 'www.bonus.primavera-and.cz', 
-                 'iepgvjxg.a2hosted.com', 'www.iepgvjxg.a2hosted.com', 
-                 'bonus.ffhh.cz', 'www.bonus.ffhh.cz', 'bonus.iepgvjxg.a2hosted.com']
+ALLOWED_HOSTS = ['iepgvjxg.a2hosted.com', 'www.iepgvjxg.a2hosted.com', 
+                 'bonuspl.iepgvjxg.a2hosted.com']
+
+# --- SUBPATH CONFIGURATION ---
+# This tells Django it's mounted at /bonuspl, not at /
+# Django will prepend this to all generated URLs, redirects, and static paths
+FORCE_SCRIPT_NAME = '/bonuspl'
 
 # Database
 DATABASES = {
@@ -44,6 +48,17 @@ SECURE_BROWSER_XSS_FILTER = True
 SECURE_CONTENT_TYPE_NOSNIFF = True
 X_FRAME_OPTIONS = 'DENY'
 
+# Adjust SESSION cookie path so it doesn't interfere with other projects on the same domain
+SESSION_COOKIE_PATH = '/bonuspl/'
+CSRF_COOKIE_PATH = '/bonuspl/'
+
+# CSRF must know the full origin
+CSRF_TRUSTED_ORIGINS = [
+    'https://primavera-and.pl',
+    'https://www.primavera-and.pl',
+    'iepgvjxg.a2hosted.com',
+]
+
 # Django Q settings - adjust workers based on server capacity
 Q_CLUSTER = {
     'name': 'bonus',
@@ -72,28 +87,17 @@ LOGGING = {
             'format': '{levelname} {asctime} {module} {process:d} {thread:d} {message}',
             'style': '{',
         },
-        'simple': {
-            'format': '{levelname} {message}',
-            'style': '{',
-        },
     },
     'handlers': {
         'file': {
             'level': 'ERROR',
             'class': 'logging.FileHandler',
-            'filename': '/home/iepgvjxg/public_html/logs/django_error.log',
-            'formatter': 'verbose',
-        },
-        'debug_file': {
-            'level': 'DEBUG',
-            'class': 'logging.FileHandler',
-            'filename': '/home/iepgvjxg/public_html/logs/django_debug.log',
+            'filename': str(BASE_DIR / 'logs' / 'django_error.log'),
             'formatter': 'verbose',
         },
         'console': {
             'level': 'ERROR',
             'class': 'logging.StreamHandler',
-            'formatter': 'simple',
         },
     },
     'root': {
@@ -102,25 +106,24 @@ LOGGING = {
     },
     'loggers': {
         'django': {
-            'handlers': ['file', 'debug_file'],
-            'level': 'DEBUG',
-            'propagate': True,
+            'handlers': ['file'],
+            'level': 'ERROR',
+            'propagate': False,
         },
         'pa_bonus': {
-            'handlers': ['file', 'debug_file'],
-            'level': 'DEBUG',
-            'propagate': True,
-        },
-        'pa_bonus.tasks': {
-            'handlers': ['file', 'debug_file'],
-            'level': 'DEBUG',
+            'handlers': ['file'],
+            'level': 'WARNING',
             'propagate': False,
         },
     },
 }
 
-# Static files
-STATIC_URL = '/static/'
-STATIC_ROOT = '/home/iepgvjxg/public_html/static/'
-MEDIA_URL = '/media/'
-MEDIA_ROOT = '/home/iepgvjxg/public_html/media/'
+# --- STATIC & MEDIA: relative to BASE_DIR, self-contained ---
+# BASE_DIR resolves to the project root (where manage.py lives)
+# This keeps everything INSIDE the project directory, no more escaping to public_html
+
+STATIC_URL = '/bonuspl/static/'
+STATIC_ROOT = BASE_DIR / 'staticfiles'   # e.g. /home/NEWUSER/bonuspl/staticfiles/
+
+MEDIA_URL = '/bonuspl/media/'
+MEDIA_ROOT = BASE_DIR / 'media'          # e.g. /home/NEWUSER/bonuspl/media/

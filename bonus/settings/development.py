@@ -23,6 +23,9 @@ DATABASES = {
     }
 }
 
+STATIC_ROOT = BASE_DIR / 'staticfiles'   # collected static goes here locally
+MEDIA_ROOT = BASE_DIR / 'media'          # uploaded files locally
+
 # Email settings - use console backend for dev
 # if DEBUG:
 #     EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
