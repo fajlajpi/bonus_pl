@@ -9,12 +9,9 @@ DEBUG = False
 SECRET_KEY = os.getenv('SECRET_KEY')
 
 ALLOWED_HOSTS = ['iepgvjxg.a2hosted.com', 'www.iepgvjxg.a2hosted.com', 
-                 'bonuspl.iepgvjxg.a2hosted.com']
+                 'bonuspl.iepgvjxg.a2hosted.com', 'bonuspl.ffhh.cz', 'www.bonuspl.ffhh.cz',
+                 'bonus.primavera-and.pl', 'www.bonus.primavera-and.pl']
 
-# --- SUBPATH CONFIGURATION ---
-# This tells Django it's mounted at /bonuspl, not at /
-# Django will prepend this to all generated URLs, redirects, and static paths
-FORCE_SCRIPT_NAME = '/bonuspl'
 
 # Database
 DATABASES = {
@@ -127,8 +124,8 @@ LOGGING = {
 # BASE_DIR resolves to the project root (where manage.py lives)
 # This keeps everything INSIDE the project directory, no more escaping to public_html
 
-STATIC_URL = '/bonuspl/static/'
+STATIC_URL = '/static/'
 STATIC_ROOT = BASE_DIR / 'staticfiles'   # e.g. /home/NEWUSER/bonuspl/staticfiles/
 
-MEDIA_URL = '/bonuspl/media/'
+MEDIA_URL = '/media/'
 MEDIA_ROOT = BASE_DIR / 'media'          # e.g. /home/NEWUSER/bonuspl/media/
