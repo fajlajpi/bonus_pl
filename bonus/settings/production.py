@@ -124,8 +124,8 @@ LOGGING = {
 # BASE_DIR resolves to the project root (where manage.py lives)
 # This keeps everything INSIDE the project directory, no more escaping to public_html
 
-STATIC_URL = '/static/'
-STATIC_ROOT = BASE_DIR / 'staticfiles'   # e.g. /home/NEWUSER/bonuspl/staticfiles/
+STATIC_URL = '/static_bonuspl/'
+STATIC_ROOT = '/home/iepgvjxg/public_html/static_bonuspl/'
 
-MEDIA_URL = '/media/'
-MEDIA_ROOT = BASE_DIR / 'media'          # e.g. /home/NEWUSER/bonuspl/media/
+MEDIA_URL = '/media_bonuspl/'
+MEDIA_ROOT = '/home/iepgvjxg/public_html/media_bonuspl/'
