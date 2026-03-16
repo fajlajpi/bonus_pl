@@ -1,29 +1,29 @@
 {% extends "base.html" %}
-{% block title %}Reward Requests — Sales Rep{% endblock %}
+{% block title %}Zamówienia nagród — Przedstawiciel Handlowy{% endblock %}
 
 {% block content %}
 <div class="dashboard-container">
-  <h2>Reward Requests (My Regions)</h2>
+  <h2>Zamówienia nagród (Moje regiony)</h2>
 
   <!-- Status Filter -->
   <div class="filter-bar">
     <form method="get">
       <div class="filter-row">
         <div class="filter-group">
-          <label for="status">Filter by Status</label>
+          <label for="status">Filtruj według statusu</label>
           <select name="status" id="status">
-            <option value="">All</option>
-            <option value="DRAFT" {% if selected_status == 'DRAFT' %}selected{% endif %}>Draft</option>
-            <option value="PENDING" {% if selected_status == 'PENDING' %}selected{% endif %}>Pending</option>
-            <option value="ACCEPTED" {% if selected_status == 'ACCEPTED' %}selected{% endif %}>Accepted</option>
-            <option value="REJECTED" {% if selected_status == 'REJECTED' %}selected{% endif %}>Rejected</option>
-            <option value="FINISHED" {% if selected_status == 'FINISHED' %}selected{% endif %}>Finished</option>
-            <option value="CANCELLED" {% if selected_status == 'CANCELLED' %}selected{% endif %}>Cancelled</option>
+            <option value="">Wszystkie</option>
+            <option value="DRAFT" {% if selected_status == 'DRAFT' %}selected{% endif %}>Szkic</option>
+            <option value="PENDING" {% if selected_status == 'PENDING' %}selected{% endif %}>Oczekujące</option>
+            <option value="ACCEPTED" {% if selected_status == 'ACCEPTED' %}selected{% endif %}>Zaakceptowane</option>
+            <option value="REJECTED" {% if selected_status == 'REJECTED' %}selected{% endif %}>Odrzucone</option>
+            <option value="FINISHED" {% if selected_status == 'FINISHED' %}selected{% endif %}>Zakończone</option>
+            <option value="CANCELLED" {% if selected_status == 'CANCELLED' %}selected{% endif %}>Anulowane</option>
           </select>
         </div>
         <div class="filter-group">
-          <button type="submit" class="btn-filter">Filter</button>
-          <a href="{% url 'salesrep_reward_requests' %}" class="btn-reset">Reset</a>
+          <button type="submit" class="btn-filter">Filtruj</button>
+          <a href="{% url 'salesrep_reward_requests' %}" class="btn-reset">Resetuj</a>
         </div>
       </div>
     </form>
@@ -35,14 +35,14 @@
       <thead>
         <tr>
           <th>ID</th>
-          <th>Client</th>
-          <th>Customer Number</th>
+          <th>Klient</th>
+          <th>Numer klienta</th>
           <th>Region</th>
           <th>Status</th>
-          <th>Total Points</th>
-          <th>Requested</th>
-          <th>Note</th>
-          <th>Actions</th>
+          <th>Łącznie punktów</th>
+          <th>Data złożenia</th>
+          <th>Notatka</th>
+          <th>Akcje</th>
         </tr>
       </thead>
       <tbody>
@@ -55,7 +55,7 @@
           <td>
             <span class="status-badge {{ req.status|lower }}">{{ req.get_status_display }}</span>
           </td>
-          <td class="value negative">{{ req.total_points }} pts</td>
+          <td class="value negative">{{ req.total_points }} pkt</td>
           <td>{{ req.requested_at|date:"d.m.Y" }}</td>
           <td>
             {% if req.note %}
@@ -63,12 +63,12 @@
             {% endif %}
           </td>
           <td>
-            <a href="{% url 'salesrep_client_detail' req.user.pk %}" class="details-link">View Client</a>
+            <a href="{% url 'salesrep_client_detail' req.user.pk %}" class="details-link">Podgląd klienta</a>
           </td>
         </tr>
         {% empty %}
         <tr>
-          <td colspan="9">No reward requests found.</td>
+          <td colspan="9">Nie znaleziono zamówień nagród.</td>
         </tr>
         {% endfor %}
       </tbody>

@@ -1,10 +1,10 @@
 {% extends "base.html" %}
 {% load pa_bonus_extras %}
-{% block title %}My Clients{% endblock %}
+{% block title %}Moi klienci{% endblock %}
 
 {% block content %}
 <div class="dashboard-container">
-  <h2>My Clients</h2>
+  <h2>Moi klienci</h2>
 
   <!-- Filters -->
   <div class="filter-bar">
@@ -14,7 +14,7 @@
         <div class="filter-group">
           <label for="region">Region</label>
           <select name="region" id="region">
-            <option value="all">All Regions</option>
+            <option value="all">Wszystkie regiony</option>
             {% for region in regions %}
               <option value="{{ region.id }}" {% if selected_region == region.id|slugify %}selected{% endif %}>
                 {{ region.name }}
@@ -25,7 +25,7 @@
         {% endif %}
 
         <div class="filter-group">
-          <label for="month_from">From</label>
+          <label for="month_from">Od</label>
           <select name="month_from" id="month_from">
             {% for num, name in months %}
               <option value="{{ num }}" {% if month_from == num %}selected{% endif %}>{{ name }}</option>
@@ -33,7 +33,7 @@
           </select>
         </div>
         <div class="filter-group">
-          <label for="year_from">Year</label>
+          <label for="year_from">Rok</label>
           <select name="year_from" id="year_from">
             {% year_range 2024 2030 as years %}
             {% for y in years %}
@@ -43,7 +43,7 @@
         </div>
 
         <div class="filter-group">
-          <label for="month_to">To</label>
+          <label for="month_to">Do</label>
           <select name="month_to" id="month_to">
             {% for num, name in months %}
               <option value="{{ num }}" {% if month_to == num %}selected{% endif %}>{{ name }}</option>
@@ -51,7 +51,7 @@
           </select>
         </div>
         <div class="filter-group">
-          <label for="year_to">Year</label>
+          <label for="year_to">Rok</label>
           <select name="year_to" id="year_to">
             {% year_range 2024 2030 as years %}
             {% for y in years %}
@@ -61,28 +61,28 @@
         </div>
 
         <div class="filter-group">
-          <button type="submit" class="btn-filter">Filter</button>
-          <a href="{% url 'salesrep_clients' %}" class="btn-reset">Reset</a>
+          <button type="submit" class="btn-filter">Filtruj</button>
+          <a href="{% url 'salesrep_clients' %}" class="btn-reset">Resetuj</a>
         </div>
       </div>
     </form>
   </div>
 
-  <p>Showing {{ clients|length }} clients for period {{ date_from|date:"d.m.Y" }} – {{ date_to|date:"d.m.Y" }}.</p>
+  <p>Wyświetlanie {{ clients|length }} klientów za okres {{ date_from|date:"d.m.Y" }} – {{ date_to|date:"d.m.Y" }}.</p>
 
   <!-- Client Table -->
   <div class="table-container">
     <table class="transactions-table">
       <thead>
         <tr>
-          <th>Client</th>
-          <th>Customer Number</th>
+          <th>Klient</th>
+          <th>Numer klienta</th>
           <th>Region</th>
-          <th>Contract</th>
-          <th>Turnover (Period)</th>
-          <th>Points (Period)</th>
-          <th>Available Balance</th>
-          <th>Actions</th>
+          <th>Umowa</th>
+          <th>Obrót (okres)</th>
+          <th>Punkty (okres)</th>
+          <th>Saldo dostępne</th>
+          <th>Akcje</th>
         </tr>
       </thead>
       <tbody>
@@ -93,22 +93,22 @@
           <td>{{ row.user.region.name|default:"—" }}</td>
           <td>
             {% if row.contract %}
-              <span class="status-badge confirmed">Active</span>
+              <span class="status-badge confirmed">Aktywna</span>
             {% else %}
-              <span class="status-badge cancelled">None</span>
+              <span class="status-badge cancelled">Brak</span>
             {% endif %}
           </td>
           <td>{{ row.turnover|floatformat:0 }} PLN</td>
           <td class="value positive">{{ row.user.confirmed_points }}</td>
           <td class="value">{{ row.user.available_points }}</td>
           <td>
-            <a href="{% url 'salesrep_client_detail' row.user.pk %}" class="details-link">Detail</a>
-            <a href="{% url 'salesrep_create_reward_request' row.user.pk %}" class="details-link">Request</a>
+            <a href="{% url 'salesrep_client_detail' row.user.pk %}" class="details-link">Szczegóły</a>
+            <a href="{% url 'salesrep_create_reward_request' row.user.pk %}" class="details-link">Zamówienie</a>
           </td>
         </tr>
         {% empty %}
         <tr>
-          <td colspan="8">No clients found.</td>
+          <td colspan="8">Nie znaleziono klientów.</td>
         </tr>
         {% endfor %}
       </tbody>

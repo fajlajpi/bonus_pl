@@ -1,6 +1,6 @@
 {% extends "base.html" %}
 {% load pa_bonus_extras %}
-{% block title %}Client Detail — {{ client.first_name }} {{ client.last_name }}{% endblock %}
+{% block title %}Szczegóły klienta — {{ client.first_name }} {{ client.last_name }}{% endblock %}
 
 {% block content %}
 <div class="dashboard-container">
@@ -8,32 +8,32 @@
   <div class="page-header">
     <h2>{{ client.first_name }} {{ client.last_name }}</h2>
     <p class="page-description">
-      Customer #{{ client.user_number }}
+      Klient nr {{ client.user_number }}
       {% if client.region %} · Region: {{ client.region.name }}{% endif %}
       {% if client.email %} · {{ client.email }}{% endif %}
     </p>
     <div class="dashboard-actions" style="margin-top: 1rem;">
       <a href="{% url 'salesrep_clients' %}" class="dashboard-button">
-        <span class="button-text">← Back to Client List</span>
+        <span class="button-text">← Powrót do listy klientów</span>
       </a>
       <a href="{% url 'salesrep_create_reward_request' client.pk %}" class="dashboard-button">
         <span class="button-icon">🎁</span>
-        <span class="button-text">Create Reward Request</span>
+        <span class="button-text">Utwórz zamówienie nagrody</span>
       </a>
     </div>
   </div>
 
   <!-- Points Summary -->
   <div class="dashboard-section">
-    <h3>Points Summary</h3>
+    <h3>Podsumowanie punktów</h3>
     <div class="summary-stats">
       <div class="stat-card">
         <span class="stat-value">{{ point_totals.available }}</span>
-        <span class="stat-label">Available Balance</span>
+        <span class="stat-label">Saldo dostępne</span>
       </div>
       <div class="stat-card">
         <span class="stat-value">{{ point_totals.period_confirmed }}</span>
-        <span class="stat-label">Confirmed (Period)</span>
+        <span class="stat-label">Potwierdzone (okres)</span>
       </div>
     </div>
   </div>
@@ -43,7 +43,7 @@
     <form method="get">
       <div class="filter-row">
         <div class="filter-group">
-          <label for="month_from">From</label>
+          <label for="month_from">Od</label>
           <select name="month_from" id="month_from">
             {% for num, name in months %}
               <option value="{{ num }}" {% if month_from == num %}selected{% endif %}>{{ name }}</option>
@@ -51,7 +51,7 @@
           </select>
         </div>
         <div class="filter-group">
-          <label for="year_from">Year</label>
+          <label for="year_from">Rok</label>
           <select name="year_from" id="year_from">
             {% year_range 2024 2030 as years %}
             {% for y in years %}
@@ -61,7 +61,7 @@
         </div>
 
         <div class="filter-group">
-          <label for="month_to">To</label>
+          <label for="month_to">Do</label>
           <select name="month_to" id="month_to">
             {% for num, name in months %}
               <option value="{{ num }}" {% if month_to == num %}selected{% endif %}>{{ name }}</option>
@@ -69,7 +69,7 @@
           </select>
         </div>
         <div class="filter-group">
-          <label for="year_to">Year</label>
+          <label for="year_to">Rok</label>
           <select name="year_to" id="year_to">
             {% year_range 2024 2030 as years %}
             {% for y in years %}
@@ -79,7 +79,7 @@
         </div>
 
         <div class="filter-group">
-          <button type="submit" class="btn-filter">Filter</button>
+          <button type="submit" class="btn-filter">Filtruj</button>
         </div>
       </div>
     </form>
@@ -87,27 +87,27 @@
 
   <!-- Contract Info -->
   <div class="dashboard-section">
-    <h3>Contract</h3>
+    <h3>Umowa</h3>
     {% if active_contract %}
-      <p>Active contract: {{ active_contract.contract_date_from|date:"d.m.Y" }} – {{ active_contract.contract_date_to|date:"d.m.Y" }}</p>
+      <p>Aktywna umowa: {{ active_contract.contract_date_from|date:"d.m.Y" }} – {{ active_contract.contract_date_to|date:"d.m.Y" }}</p>
     {% else %}
-      <p>No active contract.</p>
+      <p>Brak aktywnej umowy.</p>
     {% endif %}
   </div>
 
   <!-- Brand Turnovers -->
   <div class="dashboard-section">
-    <h3>Brand Turnovers ({{ date_from|date:"d.m.Y" }} – {{ date_to|date:"d.m.Y" }})</h3>
+    <h3>Obroty wg marek ({{ date_from|date:"d.m.Y" }} – {{ date_to|date:"d.m.Y" }})</h3>
     <div class="table-container">
       <table class="transactions-table">
         <thead>
           <tr>
-            <th>Brand</th>
-            <th>Invoice Turnover</th>
-            <th>Credit Notes</th>
-            <th>Net Turnover</th>
-            <th>Points</th>
-            <th>In Contract</th>
+            <th>Marka</th>
+            <th>Obrót z faktur</th>
+            <th>Dobropisy</th>
+            <th>Obrót netto</th>
+            <th>Punkty</th>
+            <th>W umowie</th>
           </tr>
         </thead>
         <tbody>
@@ -118,28 +118,28 @@
             <td>{{ data.credit_turnover|floatformat:2 }} PLN</td>
             <td>{{ data.net_turnover|floatformat:2 }} PLN</td>
             <td class="value {% if data.points < 0 %}negative{% else %}positive{% endif %}">
-              {{ data.points }} pts
+              {{ data.points }} pkt
             </td>
             <td>
               {% if data.in_contract %}
-                <span class="status-badge confirmed">Yes</span>
+                <span class="status-badge confirmed">Tak</span>
               {% else %}
-                <span class="status-badge pending">No</span>
+                <span class="status-badge pending">Nie</span>
               {% endif %}
             </td>
           </tr>
           {% empty %}
           <tr>
-            <td colspan="6">No turnover data found for the selected period.</td>
+            <td colspan="6">Brak danych o obrotach dla wybranego okresu.</td>
           </tr>
           {% endfor %}
           {% if brand_turnovers %}
           <tr class="summary-row">
-            <td><strong>TOTAL</strong></td>
+            <td><strong>RAZEM</strong></td>
             <td>{{ brand_turnovers|sum_attr:"invoice_turnover"|floatformat:2 }} PLN</td>
             <td>{{ brand_turnovers|sum_attr:"credit_turnover"|floatformat:2 }} PLN</td>
             <td>{{ brand_turnovers|sum_attr:"net_turnover"|floatformat:2 }} PLN</td>
-            <td class="value"><strong>{{ brand_turnovers|sum_attr:"points" }} pts</strong></td>
+            <td class="value"><strong>{{ brand_turnovers|sum_attr:"points" }} pkt</strong></td>
             <td></td>
           </tr>
           {% endif %}
@@ -150,15 +150,15 @@
 
   <!-- Recent Transactions -->
   <div class="dashboard-section">
-    <h3>Recent Point Transactions</h3>
+    <h3>Ostatnie transakcje punktowe</h3>
     <div class="table-container">
       <table class="transactions-table">
         <thead>
           <tr>
-            <th>Date</th>
-            <th>Brand</th>
-            <th>Description</th>
-            <th>Points</th>
+            <th>Data</th>
+            <th>Marka</th>
+            <th>Opis</th>
+            <th>Punkty</th>
             <th>Status</th>
           </tr>
         </thead>
@@ -166,10 +166,10 @@
           {% for transaction in recent_transactions %}
           <tr>
             <td>{{ transaction.date|date:"d.m.Y" }}</td>
-            <td>{{ transaction.brand.name|default:"N/A" }}</td>
+            <td>{{ transaction.brand.name|default:"—" }}</td>
             <td>{{ transaction.description }}</td>
             <td class="value {% if transaction.value < 0 %}negative{% else %}positive{% endif %}">
-              {{ transaction.value }} pts
+              {{ transaction.value }} pkt
             </td>
             <td>
               <span class="status-badge {{ transaction.status|lower }}">{{ transaction.get_status_display }}</span>
@@ -177,7 +177,7 @@
           </tr>
           {% empty %}
           <tr>
-            <td colspan="5">No recent transactions found.</td>
+            <td colspan="5">Nie znaleziono transakcji.</td>
           </tr>
           {% endfor %}
         </tbody>
@@ -187,22 +187,22 @@
 
   <!-- Reward Requests -->
   <div class="dashboard-section">
-    <h3>Reward Requests</h3>
+    <h3>Zamówienia nagród</h3>
     <div class="table-container">
       <table class="transactions-table">
         <thead>
           <tr>
-            <th>Date</th>
-            <th>Points</th>
+            <th>Data</th>
+            <th>Punkty</th>
             <th>Status</th>
-            <th>Note</th>
+            <th>Notatka</th>
           </tr>
         </thead>
         <tbody>
           {% for req in reward_requests %}
           <tr>
             <td>{{ req.requested_at|date:"d.m.Y" }}</td>
-            <td class="value negative">{{ req.total_points }} pts</td>
+            <td class="value negative">{{ req.total_points }} pkt</td>
             <td>
               <span class="status-badge {{ req.status|lower }}">{{ req.get_status_display }}</span>
             </td>
@@ -214,7 +214,7 @@
           </tr>
           {% empty %}
           <tr>
-            <td colspan="4">No reward requests found.</td>
+            <td colspan="4">Nie znaleziono zamówień nagród.</td>
           </tr>
           {% endfor %}
         </tbody>

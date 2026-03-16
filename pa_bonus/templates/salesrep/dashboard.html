@@ -1,57 +1,57 @@
 {% extends "base.html" %}
-{% block title %}Sales Rep Dashboard{% endblock %}
+{% block title %}Panel Przedstawiciela Handlowego{% endblock %}
 
 {% block content %}
 <div class="dashboard-container">
-  <h2>Sales Rep Dashboard</h2>
-  <p>Welcome, {{ user.first_name }} {{ user.last_name }}.</p>
+  <h2>Panel Przedstawiciela Handlowego</h2>
+  <p>Witaj, {{ user.first_name }} {{ user.last_name }}.</p>
 
   <!-- Regions -->
   <div class="dashboard-section">
-    <h3>Your Regions</h3>
+    <h3>Twoje Regiony</h3>
     <ul>
       {% for region in regions %}
         <li><strong>{{ region.name }}</strong> ({{ region.code }})</li>
       {% empty %}
-        <li>No regions assigned.</li>
+        <li>Brak przypisanych regionów.</li>
       {% endfor %}
     </ul>
   </div>
 
   <!-- Summary Stats -->
   <div class="dashboard-section">
-    <h3>Overview</h3>
+    <h3>Podsumowanie</h3>
     <div class="summary-stats">
       <div class="stat-card">
         <span class="stat-value">{{ total_clients }}</span>
-        <span class="stat-label">Total Clients</span>
+        <span class="stat-label">Łącznie klientów</span>
       </div>
       <div class="stat-card">
         <span class="stat-value">{{ clients_with_contracts }}</span>
-        <span class="stat-label">With Active Contracts</span>
+        <span class="stat-label">Z aktywnymi umowami</span>
       </div>
       <div class="stat-card">
         <span class="stat-value">{{ total_confirmed_points }}</span>
-        <span class="stat-label">Total Confirmed Points</span>
+        <span class="stat-label">Łącznie potwierdzonych punktów</span>
       </div>
       <div class="stat-card">
         <span class="stat-value">{{ pending_requests }}</span>
-        <span class="stat-label">Pending Reward Requests</span>
+        <span class="stat-label">Oczekujące zamówienia nagród</span>
       </div>
     </div>
   </div>
 
   <!-- Quick Links -->
   <div class="dashboard-section">
-    <h3>Quick Links</h3>
+    <h3>Szybkie linki</h3>
     <div class="dashboard-actions">
       <a href="{% url 'salesrep_clients' %}" class="dashboard-button">
         <span class="button-icon">👥</span>
-        <span class="button-text">My Clients</span>
+        <span class="button-text">Moi klienci</span>
       </a>
       <a href="{% url 'salesrep_reward_requests' %}" class="dashboard-button">
         <span class="button-icon">🎁</span>
-        <span class="button-text">Reward Requests</span>
+        <span class="button-text">Zamówienia nagród</span>
       </a>
     </div>
   </div>
@@ -59,16 +59,16 @@
   <!-- Top Clients by Points -->
   {% if top_clients %}
   <div class="dashboard-section">
-    <h3>Top Clients by Available Points</h3>
+    <h3>Najlepsi klienci wg dostępnych punktów</h3>
     <div class="table-container">
       <table class="transactions-table">
         <thead>
           <tr>
-            <th>Client</th>
-            <th>Customer Number</th>
+            <th>Klient</th>
+            <th>Numer klienta</th>
             <th>Region</th>
-            <th>Available Points</th>
-            <th>Actions</th>
+            <th>Dostępne punkty</th>
+            <th>Akcje</th>
           </tr>
         </thead>
         <tbody>
@@ -79,7 +79,7 @@
             <td>{{ client.region.name|default:"—" }}</td>
             <td class="value positive">{{ client.available_points }}</td>
             <td>
-              <a href="{% url 'salesrep_client_detail' client.pk %}" class="details-link">View</a>
+              <a href="{% url 'salesrep_client_detail' client.pk %}" class="details-link">Podgląd</a>
             </td>
           </tr>
           {% endfor %}
