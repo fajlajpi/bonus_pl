@@ -97,7 +97,7 @@ class SalesRepDashboardView(SalesRepRequiredMixin, View):
             available_points=Coalesce(
                 Sum('pointstransaction__value',
                     filter=Q(pointstransaction__status='CONFIRMED')),
-                Value(0),
+                Value(0), output_field=DecimalField()
             ),
         ).filter(available_points__gt=0).order_by('-available_points')[:10]
 
@@ -152,12 +152,12 @@ class SalesRepClientListView(SalesRepRequiredMixin, View):
                         pointstransaction__date__gte=date_from,
                         pointstransaction__date__lte=date_to,
                     )),
-                Value(0),
+                Value(0), output_field=DecimalField()
             ),
             available_points=Coalesce(
                 Sum('pointstransaction__value',
                     filter=Q(pointstransaction__status='CONFIRMED')),
-                Value(0),
+                Value(0), output_field=DecimalField()
             ),
         ).order_by('last_name', 'first_name')
 
@@ -260,7 +260,7 @@ class SalesRepClientDetailView(SalesRepRequiredMixin, View):
             pts = PointsTransaction.objects.filter(
                 user=client, date__gte=date_from, date__lte=date_to,
                 brand=brand, status='CONFIRMED',
-            ).aggregate(total=Coalesce(Sum('value'), Value(0)))['total']
+            ).aggregate(total=Coalesce(Sum('value'), Value(0), output_field=DecimalField()))['total']
 
             if inv > 0 or cn > 0 or pts != 0:
                 brand_turnovers.append({
@@ -279,7 +279,7 @@ class SalesRepClientDetailView(SalesRepRequiredMixin, View):
             'available': client.get_balance(),
             'period_confirmed': PointsTransaction.objects.filter(
                 user=client, date__gte=date_from, date__lte=date_to, status='CONFIRMED',
-            ).aggregate(total=Coalesce(Sum('value'), Value(0)))['total'],
+            ).aggregate(total=Coalesce(Sum('value'), Value(0), output_field=DecimalField()))['total'],
         }
 
         # Recent transactions

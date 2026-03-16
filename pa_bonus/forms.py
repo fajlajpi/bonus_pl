@@ -305,8 +305,8 @@ class ClientCreationForm(forms.Form):
                         )
                         continue
                     
-                    # Calculate points: 1 point per 500 PLN of turnover, rounded down
-                    points = int(float(turnover.amount) // 500)
+                    # Calculate points: 1 whole point per complete 500 PLN of turnover, rounded down
+                    points = turnover.amount // Decimal('500')
                     
                     # Determine transaction type and status based on invoice type
                     # Match the existing system's logic from tasks.py

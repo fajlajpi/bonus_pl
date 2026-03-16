@@ -38,14 +38,14 @@ class ManagerDashboardView(ManagerGroupRequiredMixin, View):
     
     def get(self, request):
         # System-wide points statistics
-        from django.db.models import Sum, Count, Q, F, Value
+        from django.db.models import Sum, Count, Q, F, Value, DecimalField
         from django.db.models.functions import Coalesce
         
         # 1. Total points summary
         points_summary = PointsTransaction.objects.filter(
             status__in=['PENDING', 'CONFIRMED']
         ).values('status').annotate(
-            total=Coalesce(Sum('value'), Value(0))
+            total=Coalesce(Sum('value'), Value(0), output_field=DecimalField())
         ).order_by('status')
         
         # Convert to a dictionary for easier access in template
@@ -61,7 +61,7 @@ class ManagerDashboardView(ManagerGroupRequiredMixin, View):
             status__in=['PENDING', 'ACCEPTED']
         ).values('status').annotate(
             count=Count('id'),
-            total_points=Coalesce(Sum('total_points'), Value(0))
+            total_points=Coalesce(Sum('total_points'), Value(0), output_field=DecimalField())
         ).order_by('status')
         
         # Convert to dictionary
@@ -78,14 +78,16 @@ class ManagerDashboardView(ManagerGroupRequiredMixin, View):
         # 3. Top 10 clients by available points
         top_clients = User.objects.annotate(
             available_points=Coalesce(
-                Sum('pointstransaction__value', 
+                Sum('pointstransaction__value',
                     filter=Q(pointstransaction__status='CONFIRMED')),
-                Value(0)
+                Value(0),
+                output_field=DecimalField()
             ),
             pending_points=Coalesce(
-                Sum('pointstransaction__value', 
+                Sum('pointstransaction__value',
                     filter=Q(pointstransaction__status='PENDING')),
-                Value(0)
+                Value(0),
+                output_field=DecimalField()
             )
         ).filter(
             available_points__gt=0
@@ -643,7 +645,7 @@ class ClientListView(ManagerGroupRequiredMixin, View):
                         pointstransaction__date__gte=date_from,
                         pointstransaction__date__lte=date_to
                     )),
-                Value(0)
+                Value(0), output_field=DecimalField()
             ),
             pending_points=Coalesce(
                 Sum('pointstransaction__value', 
@@ -652,12 +654,12 @@ class ClientListView(ManagerGroupRequiredMixin, View):
                         pointstransaction__date__gte=date_from,
                         pointstransaction__date__lte=date_to
                     )),
-                Value(0)
+                Value(0), output_field=DecimalField()
             ),
             available_points=Coalesce(
                 Sum('pointstransaction__value', 
                     filter=Q(pointstransaction__status='CONFIRMED')),
-                Value(0)
+                Value(0), output_field=DecimalField()
             )
         )
         
@@ -829,7 +831,7 @@ class ClientDetailView(ManagerGroupRequiredMixin, View):
                 brand=brand,
                 status='CONFIRMED'
             ).aggregate(
-                total=Coalesce(Sum('value'), Value(0))
+                total=Coalesce(Sum('value'), Value(0), output_field=DecimalField())
             )['total']
             
             # Only include brands with some activity
@@ -858,7 +860,7 @@ class ClientDetailView(ManagerGroupRequiredMixin, View):
                 date__lte=date_to,
                 status='CONFIRMED'
             ).aggregate(
-                total=Coalesce(Sum('value'), Value(0))
+                total=Coalesce(Sum('value'), Value(0), output_field=DecimalField())
             )['total'],
             'period_pending': PointsTransaction.objects.filter(
                 user=client,
@@ -866,7 +868,7 @@ class ClientDetailView(ManagerGroupRequiredMixin, View):
                 date__lte=date_to,
                 status='PENDING'
             ).aggregate(
-                total=Coalesce(Sum('value'), Value(0))
+                total=Coalesce(Sum('value'), Value(0), output_field=DecimalField())
             )['total']
         }
         

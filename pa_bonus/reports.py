@@ -383,9 +383,9 @@ class PointsReport(BaseReport):
 
     def get_column_formats(self) -> dict[int, str]:
         return {
-            7: NUMBER_FORMAT_INTEGER,
-            8: NUMBER_FORMAT_INTEGER,
-            9: NUMBER_FORMAT_INTEGER,
+            7: NUMBER_FORMAT_CURRENCY,
+            8: NUMBER_FORMAT_CURRENCY,
+            9: NUMBER_FORMAT_CURRENCY,
         }
 
     def get_rows(self) -> list[list]:
@@ -463,7 +463,7 @@ class RewardRequestsReport(BaseReport):
 
     def get_column_formats(self) -> dict[int, str]:
         return {
-            8: NUMBER_FORMAT_INTEGER,
+            8: NUMBER_FORMAT_CURRENCY,
         }
 
     def get_rows(self) -> list[list]:
@@ -532,9 +532,9 @@ class ItemisedRewardsReport(BaseReport):
 
     def get_column_formats(self) -> dict[int, str]:
         return {
-            9: NUMBER_FORMAT_INTEGER,
-            10: NUMBER_FORMAT_INTEGER,
-            11: NUMBER_FORMAT_INTEGER,
+            9: NUMBER_FORMAT_CURRENCY,
+            10: NUMBER_FORMAT_CURRENCY,
+            11: NUMBER_FORMAT_CURRENCY,
         }
 
     def get_rows(self) -> list[list]:

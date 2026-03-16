@@ -2,6 +2,7 @@ from django.db import models
 from django.db.models import Sum
 from django.contrib.auth.models import AbstractUser, Group, Permission
 from django.contrib.contenttypes.models import ContentType
+from decimal import Decimal
 import os
 import logging
 
@@ -129,12 +130,12 @@ class User(AbstractUser):
     def __str__(self):
         return self.username + ' | ' + (self.first_name + ' ' + self.last_name if self.first_name or self.last_name else '')
 
-    def get_balance(self) -> int:
+    def get_balance(self) -> Decimal:
         """
         Returns the customers current point balance.
 
         Returns:
-            int: Current point balance, 0 if there are no transactions
+            Decimal: Current point balance, 0 if there are no transactions
         """
         total_points = PointsTransaction.objects.filter(
             user = self.id,
@@ -239,7 +240,7 @@ class PointsTransaction(models.Model):
     are opposites of invoices).
 
     Attributes:
-        value (int): The point value of the transaction.
+        value (Decimal): The point value of the transaction.
         date (Date): The date the transaction was recorded.
         user (User): The User object the transaction belongs to.
         description (str): A description of the transaction (max 100 characters).
@@ -263,7 +264,7 @@ class PointsTransaction(models.Model):
         ('CONFIRMED', 'Confirmed'),
         ('CANCELLED', 'Cancelled')
     )
-    value = models.IntegerField()
+    value = models.DecimalField(max_digits=10, decimal_places=2)
     date = models.DateField()
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     description = models.CharField(max_length=100)
@@ -290,11 +291,11 @@ class PointsBalance(models.Model):
     Attributes:
         user_id (User): The user this balance belongs to
         date (Date): Date this balance was calculated
-        points (int): The balance of points
+        points (Decimal): The balance of points
     """
     user_id = models.ForeignKey(User, on_delete=models.CASCADE)
     date = models.DateField()
-    points = models.IntegerField()
+    points = models.DecimalField(max_digits=10, decimal_places=2)
 
 class BrandBonus(models.Model):
     """
@@ -355,7 +356,7 @@ class Reward(models.Model):
     Attributes:
         abra_code (str): Code in the ABRA system for the item (max 30 characters)
         name (str): Name of the item (max 100 characters)
-        point_cost (int): Point cost of the item.
+        point_cost (Decimal): Point cost of the item.
         description (str): Description of the item.
         brand (Brand): Brand, in case the item is restricted to only clients with the same Brand in their UserContract (optional)
         in_showcase (bool): Whether the item should be displayed in the public catalogue showcase.
@@ -371,7 +372,7 @@ class Reward(models.Model):
     )
     abra_code = models.CharField(max_length=30, unique=True)
     name = models.CharField(max_length=100)
-    point_cost = models.IntegerField()
+    point_cost = models.DecimalField(max_digits=10, decimal_places=2)
     description = models.TextField()
     availability = models.CharField(max_length=20, choices=AVAILABILITY_TYPE, default='ON_DEMAND')
     brand = models.ForeignKey(Brand, null=True, blank=True, on_delete=models.SET_NULL)
@@ -395,7 +396,7 @@ class RewardRequest(models.Model):
         requested_at (DateTime): The time the request was created.
         status (str): Current status of the request.
         description (str): Description of the request, especially for rejected / cancelled ones.
-        total_points (int): The total point value of the request.
+        total_points (Decimal): The total point value of the request.
     """
     REQUEST_STATUS = (
         ('DRAFT', 'Draft'),
@@ -409,7 +410,7 @@ class RewardRequest(models.Model):
     requested_at = models.DateTimeField(auto_now_add=True)
     status = models.CharField(max_length=20, choices=REQUEST_STATUS, default='DRAFT')
     description = models.TextField()
-    total_points = models.IntegerField(default=0)
+    total_points = models.DecimalField(max_digits=10, decimal_places=2, default=Decimal('0.00'))
     note = models.TextField(blank=True, null=True, verbose_name="Customer Note")
     indexes = [
         models.Index(fields=['status', '-requested_at']),
@@ -439,12 +440,12 @@ class RewardRequestItem(models.Model):
         reward_request (RewardRequest): The RewardRequest this item belongs to.
         reward (Reward): The item requested.
         quantity (int): The quantity of items requested.
-        point_cost (int): The point cost at the time of request.
+        point_cost (Decimal): The point cost at the time of request.
     """
     reward_request = models.ForeignKey(RewardRequest, on_delete=models.CASCADE)
     reward = models.ForeignKey(Reward, on_delete=models.CASCADE)
     quantity = models.IntegerField()
-    point_cost = models.IntegerField()  # Storing point cost at the time of request, in case it changes over time
+    point_cost = models.DecimalField(max_digits=10, decimal_places=2)  # Storing point cost at the time of request, in case it changes over time
 
     def __str__(self):
         return f"{self.quantity} x {self.reward.name} | {self.reward_request}"
