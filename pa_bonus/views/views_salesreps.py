@@ -83,7 +83,7 @@ class SalesRepDashboardView(SalesRepRequiredMixin, View):
             user__in=clients,
             status='CONFIRMED',
         ).aggregate(
-            total=Coalesce(Sum('value'), Value(0)),
+            total=Coalesce(Sum('value'), Value(0), output_field=DecimalField()),
         )['total']
 
         # Pending reward requests in the rep's regions

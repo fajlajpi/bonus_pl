@@ -310,11 +310,13 @@ class AllClientsReport(BaseReport):
                     Sum("pointstransaction__value",
                         filter=Q(pointstransaction__status="CONFIRMED")),
                     Value(0),
+                    output_field=DecimalField(),
                 ),
                 incoming_points=Coalesce(
                     Sum("pointstransaction__value",
                         filter=Q(pointstransaction__status="PENDING")),
                     Value(0),
+                    output_field=DecimalField(),
                 ),
             )
             .order_by("last_name", "first_name")
@@ -400,11 +402,13 @@ class PointsReport(BaseReport):
                     Sum("pointstransaction__value",
                         filter=Q(pointstransaction__status="CONFIRMED")),
                     Value(0),
+                    output_field=DecimalField(),
                 ),
                 incoming_points=Coalesce(
                     Sum("pointstransaction__value",
                         filter=Q(pointstransaction__status="PENDING")),
                     Value(0),
+                    output_field=DecimalField(),
                 ),
             )
             .order_by("last_name", "first_name")
