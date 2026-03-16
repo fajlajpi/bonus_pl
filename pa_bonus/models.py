@@ -123,7 +123,7 @@ class User(AbstractUser):
         region (Region): The sales region this client belongs to (for clients only)
     """
     user_number = models.CharField(max_length=20, unique=True)
-    user_phone = models.CharField(max_length=10, unique=False)
+    user_phone = models.CharField(max_length=20, unique=False, null=True, blank=True)
     region = models.ForeignKey(Region, null=True, blank=True, on_delete=models.SET_NULL, 
                               related_name='clients')
 
