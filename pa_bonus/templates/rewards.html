@@ -66,12 +66,12 @@
             <td class="reward-quantity-cell">
               {% if reward.availability != 'UNAVAILABLE' %}
                 <div class="quantity-input">
-                  <input class="reward-input" type="number" name="reward_quantity_{{ reward.id }}" id="reward_quantity_{{ reward.id }}" value="0" min="0" 
+                  <input class="reward-input" type="number" name="reward_quantity_{{ reward.id }}" id="reward_quantity_{{ reward.id }}" value="0" min="0" data-point-cost="{{ reward.point_cost }}"
                          {% if reward.availability == 'UNAVAILABLE' %}disabled{% endif %}>
                 </div>
               {% else %}
                 <div class="quantity-input">
-                  <input class="reward-input" type="number" name="reward_quantity_{{ reward.id }}" id="reward_quantity_{{ reward.id }}" value="0" min="0" disabled>
+                  <input class="reward-input" type="number" name="reward_quantity_{{ reward.id }}" id="reward_quantity_{{ reward.id }}" value="0" min="0" data-point-cost="{{ reward.point_cost }}" disabled>
                 </div>
               {% endif %}
             </td>
@@ -100,16 +100,17 @@
       const warningText = document.getElementById('point-warning');
       const submitButton = document.getElementById('submit-button');
 
-      const userBalance = {{ user_balance|default:0 }};  // Injected from Django context
+      if (!totalDisplay || !warningText || !submitButton) return;
+
+      const userBalance = parseFloat('{{ user_balance|default:0 }}') || 0;
       const MIN_POINTS = 5.0;
-      let currentTotal = 0;
 
       function calculateTotal() {
-        currentTotal = 0;
+        let currentTotal = 0;
         inputs.forEach(input => {
           if (!input.disabled) {
             const quantity = parseInt(input.value) || 0;
-            const pointCost = parseFloat(input.closest('tr').querySelector('.point-cost').textContent);
+            const pointCost = parseFloat(input.dataset.pointCost) || 0;
             currentTotal += quantity * pointCost;
           }
         });
@@ -117,7 +118,7 @@
         totalDisplay.textContent = currentTotal + ' pkt';
 
         const exceedsBalance = currentTotal > userBalance;
-        const belowMinimum = currentTotal > 0 && currentTotal < MIN_POINTS;
+        const belowMinimum = currentTotal < MIN_POINTS;
 
         if (exceedsBalance) {
           warningText.textContent = 'Przekroczono stan konta punktowego!';
