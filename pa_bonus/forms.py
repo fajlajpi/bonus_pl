@@ -39,18 +39,18 @@ class FileUploadForm(forms.ModelForm):
     
 class EmailAuthenticationForm(AuthenticationForm):
     username = forms.CharField(
-        label="Email nebo uživatelské jméno",
+        label="Email lub nazwa użytkownika",
         widget=forms.TextInput(attrs={'autofocus': True}),
     )
     password = forms.CharField(
-        label="Heslo",
+        label="Hasło",
         strip=False,
         widget=forms.PasswordInput(attrs={'autocomplete': 'current-password'}),
     )
-    
+
     error_messages = {
-        'invalid_login': "Zadejte prosím správné uživatelské jméno (nebo emailovou adresu) a heslo. ",
-        'inactive': "Tento účet je neaktivní.",
+        'invalid_login': "Podaj prawidłową nazwę użytkownika (lub adres e-mail) i hasło.",
+        'inactive': "To konto jest nieaktywne.",
     }
 
 class ClientCreationForm(forms.Form):
