@@ -85,9 +85,9 @@
   <div id="live-total-container" class="points-summary" style="margin-top: 2rem;">
     <h3>Łączna wartość wniosku</h3>
     <span class="total-points" id="live-total">0 pkt</span> <span class="total-points">/ {{ user_balance }} dostępnych</span>
-    <p id="point-warning" style="display:none; color: var(--error-color); font-weight: bold;">Przekroczono stan konta punktowego!</p>
+    <p id="point-warning" style="display:none; color: var(--error-color); font-weight: bold;"></p>
   </div>
-  
+
   <button id="submit-button" class="submit-button" type="submit">Złóż wniosek o nagrody</button>
 {% else %}
   <p>W tej chwili nie ma żadnych dostępnych nagród.</p>
@@ -99,39 +99,46 @@
       const totalDisplay = document.getElementById('live-total');
       const warningText = document.getElementById('point-warning');
       const submitButton = document.getElementById('submit-button');
-  
+
       const userBalance = {{ user_balance|default:0 }};  // Injected from Django context
+      const MIN_POINTS = 5.0;
       let currentTotal = 0;
-  
+
       function calculateTotal() {
         currentTotal = 0;
         inputs.forEach(input => {
           if (!input.disabled) {
             const quantity = parseInt(input.value) || 0;
-            const pointCost = parseInt(input.closest('tr').querySelector('.point-cost').textContent);
+            const pointCost = parseFloat(input.closest('tr').querySelector('.point-cost').textContent);
             currentTotal += quantity * pointCost;
           }
         });
-  
-        totalDisplay.textContent = currentTotal + ' bodů';
-  
-        if (currentTotal > userBalance) {
+
+        totalDisplay.textContent = currentTotal + ' pkt';
+
+        const exceedsBalance = currentTotal > userBalance;
+        const belowMinimum = currentTotal > 0 && currentTotal < MIN_POINTS;
+
+        if (exceedsBalance) {
+          warningText.textContent = 'Przekroczono stan konta punktowego!';
           warningText.style.display = 'block';
-          submitButton.disabled = true;
-          submitButton.style.opacity = 0.6;
-          submitButton.style.pointerEvents = 'none';
+        } else if (belowMinimum) {
+          warningText.textContent = 'Minimalna wartość wniosku wynosi 5 pkt.';
+          warningText.style.display = 'block';
         } else {
           warningText.style.display = 'none';
-          submitButton.disabled = false;
-          submitButton.style.opacity = 1;
-          submitButton.style.pointerEvents = 'auto';
         }
+
+        const blocked = exceedsBalance || belowMinimum;
+        submitButton.disabled = blocked;
+        submitButton.style.opacity = blocked ? 0.6 : 1;
+        submitButton.style.pointerEvents = blocked ? 'none' : 'auto';
       }
-  
+
       inputs.forEach(input => {
         input.addEventListener('input', calculateTotal);
       });
-  
+
       calculateTotal();  // initialize on load
     });
   </script>
