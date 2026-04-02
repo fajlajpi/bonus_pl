@@ -10,7 +10,7 @@ import tablib
 import logging
 from datetime import datetime
 from django.core.exceptions import ValidationError
-from .models import Reward, Brand, User, UserContract, Region, BrandBonus
+from .models import Reward, RewardCategory, Brand, User, UserContract, Region, BrandBonus
 
 logger = logging.getLogger(__name__)
 
@@ -251,20 +251,26 @@ class RewardResource(resources.ModelResource):
     
     # Brand is a ForeignKey, so we use a ForeignKeyWidget
     brand = fields.Field(
-        column_name='brand', 
+        column_name='brand',
         attribute='brand',
         widget=ForeignKeyWidget(Brand, 'name')
     )
-    
+
+    category = fields.Field(
+        column_name='category',
+        attribute='category',
+        widget=ForeignKeyWidget(RewardCategory, 'name')
+    )
+
     is_active = fields.Field(column_name='is_active', attribute='is_active')
-    
+
     # This field will be used to indicate if an image exists
     image_exists = fields.Field(column_name='image_exists')
-    
+
     class Meta:
         model = Reward
         import_id_fields = ['abra_code']  # abra_code is the unique identifier
-        fields = ('abra_code', 'name', 'point_cost', 'description', 'brand', 'is_active', 'image_exists')
+        fields = ('abra_code', 'name', 'point_cost', 'description', 'category', 'brand', 'is_active', 'image_exists')
         export_order = fields
     
     def before_import_row(self, row, **kwargs):
