@@ -629,8 +629,8 @@ class ClientListView(ManagerGroupRequiredMixin, View):
         else:
             date_to = date(year_to, month_to + 1, 1) - timedelta(days=1)
         
-        # Base query - get all active users that are not staff
-        clients = User.objects.filter(is_active=True, is_staff=False)
+        # Base query - get all active users that are not staff and not sales reps
+        clients = User.objects.filter(is_active=True, is_staff=False).exclude(groups__name='Sales Reps')
         
         # Apply region filter if specified
         if region_id and region_id != 'all':

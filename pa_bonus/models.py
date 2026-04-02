@@ -349,6 +349,20 @@ class FileUpload(models.Model):
     def __str__(self):
         return f'Upload {self.id} | {self.uploaded_at} | {self.status} | by {self.uploaded_by}'
     
+class RewardCategory(models.Model):
+    """
+    Category for grouping Reward items (e.g. Electronics, Vouchers, Lifestyle).
+    """
+    name = models.CharField(max_length=100, unique=True)
+
+    class Meta:
+        ordering = ['name']
+        verbose_name_plural = 'Reward categories'
+
+    def __str__(self):
+        return self.name
+
+
 class Reward(models.Model):
     """
     Represents a reward item the Clients can claim for their points.
@@ -375,6 +389,7 @@ class Reward(models.Model):
     point_cost = models.DecimalField(max_digits=10, decimal_places=2)
     description = models.TextField()
     availability = models.CharField(max_length=20, choices=AVAILABILITY_TYPE, default='ON_DEMAND')
+    category = models.ForeignKey(RewardCategory, null=True, blank=True, on_delete=models.SET_NULL, related_name='rewards')
     brand = models.ForeignKey(Brand, null=True, blank=True, on_delete=models.SET_NULL)
     is_active = models.BooleanField(default=True)
     in_showcase = models.BooleanField(default=False, help_text="Display this item in the public showcase")

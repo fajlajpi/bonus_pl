@@ -8,9 +8,9 @@ from import_export.widgets import DateWidget
 from import_export.admin import ExportMixin, ImportExportMixin
 from django.forms.models import BaseInlineFormSet
 from pa_bonus.models import (
-    User, Brand, UserContract, PointsTransaction, BrandBonus, 
-    FileUpload, Reward, RewardRequest, RewardRequestItem, EmailNotification, Invoice, InvoiceBrandTurnover,
-    Region, RegionRep, UserActivity, 
+    User, Brand, UserContract, PointsTransaction, BrandBonus,
+    FileUpload, Reward, RewardCategory, RewardRequest, RewardRequestItem, EmailNotification, Invoice, InvoiceBrandTurnover,
+    Region, RegionRep, UserActivity,
 )
 from .resources import UserResource, UserContractResource, RewardResource, OptimizedUserResource
 
@@ -158,11 +158,17 @@ class FileUploadAdmin(admin.ModelAdmin):
     list_filter = ('status', 'uploaded_at', 'uploaded_by')
     readonly_fields = ('uploaded_at', 'processed_at', 'status', 'error_message')
 
+@admin.register(RewardCategory)
+class RewardCategoryAdmin(admin.ModelAdmin):
+    list_display = ('name',)
+    search_fields = ('name',)
+
+
 @admin.register(Reward)
 class RewardAdmin(ImportExportMixin, admin.ModelAdmin):
     resource_class = RewardResource
-    list_display = ('abra_code', 'name', 'point_cost', 'brand', 'is_active', 'availability', 'in_showcase')
-    list_filter = ('brand', 'is_active')
+    list_display = ('abra_code', 'name', 'point_cost', 'category', 'brand', 'is_active', 'availability', 'in_showcase')
+    list_filter = ('category', 'brand', 'is_active')
     search_fields = ('abra_code', 'name')
     readonly_fields = ('created_at',)
     actions = [reward_availability_set_available, reward_availability_set_on_demand, reward_availability_set_unavailable,

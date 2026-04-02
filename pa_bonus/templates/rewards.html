@@ -15,6 +15,21 @@
       lub zwróć się do swojego opiekuna handlowego.</p>
     <p>Obecnie finalizujemy dodawanie pełnej oferty — niektórych nagród może jeszcze brakować.</p>
   </div>
+  {% if categories %}
+  <div class="category-tabs" style="margin-bottom: 1.2rem; display: flex; flex-wrap: wrap; gap: 0.5rem;">
+    <button type="button" class="category-tab active" data-category="all"
+            style="padding: 0.4rem 1rem; border: 1px solid var(--primary-color, #555); border-radius: 4px; cursor: pointer; background: var(--primary-color, #555); color: #fff;">
+      Wszystkie
+    </button>
+    {% for cat in categories %}
+    <button type="button" class="category-tab" data-category="{{ cat.id }}"
+            style="padding: 0.4rem 1rem; border: 1px solid var(--primary-color, #555); border-radius: 4px; cursor: pointer; background: transparent;">
+      {{ cat.name }}
+    </button>
+    {% endfor %}
+  </div>
+  {% endif %}
+
   <form method="post">
     {% csrf_token %}
 {% if rewards %}
@@ -31,7 +46,7 @@
       </thead>
       <tbody>
         {% for reward in rewards %}
-          <tr>
+          <tr data-category="{{ reward.category_id|default:'none' }}">
             <td class="reward-image-cell">
               {% if reward.image %}
                 <img src="{{ reward.image.url }}" alt="{{ reward.name }}" class="reward-image">
@@ -141,6 +156,30 @@
       });
 
       calculateTotal();  // initialize on load
+    });
+
+    // Category tab filtering
+    document.querySelectorAll('.category-tab').forEach(function(btn) {
+      btn.addEventListener('click', function() {
+        const cat = this.dataset.category;
+
+        // Update active tab styling
+        document.querySelectorAll('.category-tab').forEach(function(b) {
+          b.style.background = 'transparent';
+          b.style.color = '';
+          b.classList.remove('active');
+        });
+        this.style.background = 'var(--primary-color, #555)';
+        this.style.color = '#fff';
+        this.classList.add('active');
+
+        // Show/hide rows — quantities in hidden rows are preserved and still count toward the total
+        document.querySelectorAll('.rewards-table tbody tr').forEach(function(row) {
+          row.style.display = (cat === 'all' || row.dataset.category === cat) ? '' : 'none';
+        });
+
+        calculateTotal();
+      });
     });
   </script>
 {% endblock %}

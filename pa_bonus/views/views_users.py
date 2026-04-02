@@ -5,7 +5,7 @@ from django.views.generic import TemplateView, ListView, DetailView, View
 from django.db.models import Q
 from django.db import transaction
 from django.utils import timezone
-from pa_bonus.models import (PointsTransaction, UserContract, Reward, RewardRequest, RewardRequestItem,)
+from pa_bonus.models import (PointsTransaction, UserContract, Reward, RewardCategory, RewardRequest, RewardRequestItem,)
 import datetime
 
 class DashboardView(LoginRequiredMixin, TemplateView):
@@ -115,9 +115,12 @@ class RewardsView(LoginRequiredMixin, View):
         # Get user's point balance
         total_points = user.get_balance()
 
+        categories = RewardCategory.objects.filter(rewards__in=available_rewards).distinct().order_by('name')
+
         context = {
             'rewards': available_rewards,
             'user_balance': total_points,
+            'categories': categories,
         }
 
         return render(request, self.template_name, context)

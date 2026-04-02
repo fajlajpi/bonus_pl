@@ -1,22 +1,21 @@
 {% extends "base.html" %}
-{% load pa_bonus_extras %}
 
 {% block title %} Szczegóły transakcji {% endblock title %}
 
 {% block content %}
-<div class="transaction-detail-container">
-    <h2>Szczegóły transakcji punktowych</h2>
-    
-    <div class="transaction-info">
-        <p><strong>Data:</strong> {{ transaction.date|czech_date }}</p>
-        
+<div class="dashboard-container">
+    <div class="dashboard-section">
+        <h2>Szczegóły transakcji punktowej</h2>
+
+        <p><strong>Data:</strong> {{ transaction.date|date:"d.m.Y" }}</p>
+
         {% if transaction.brand %}
-        <p><strong>Ocena:</strong> {{ transaction.brand.name }}</p>
+        <p><strong>Marka:</strong> {{ transaction.brand.name }}</p>
         {% endif %}
-        
-        <p><strong>Zwrotnica:</strong> <span class="value {% if transaction.value < 0 %}negative{% else %}positive{% endif %}">{{ transaction.value }} pkt</span></p>
-        
-        <p><strong>Typ:</strong> 
+
+        <p><strong>Wartość:</strong> <span class="value {% if transaction.value < 0 %}negative{% else %}positive{% endif %}">{{ transaction.value }} pkt</span></p>
+
+        <p><strong>Typ:</strong>
             {% if transaction.type == 'STANDARD_POINTS' %}
                 Standardowe naliczenie punktów
             {% elif transaction.type == 'REWARD_CLAIM' %}
@@ -29,16 +28,16 @@
                 {{ transaction.get_type_display }}
             {% endif %}
         </p>
+
         {% if transaction.type == 'REWARD_CLAIM' %}
         <div class="intro-text">
-            <p>Status <span class="status-badge confirmed">Potwierdzony</span> znacza, że zablokowaliśmy punkty,
+            <p>Status <span class="status-badge confirmed">Potwierdzony</span> oznacza, że zablokowaliśmy punkty,
                  ale samo żądanie wypłaty może nadal oczekiwać na przetworzenie. <a href="{% url 'rewards_request_detail' transaction.reward_request.id %}">Szczegóły znajdziesz tutaj.</a>
             </p>
         </div>
         {% endif %}
 
-        
-        <p><strong>Stav:</strong>
+        <p><strong>Status:</strong>
             <span class="status-badge {{ transaction.status|lower }}">
                 {% if transaction.status == 'PENDING' %}
                     Oczekuje na potwierdzenie
@@ -53,13 +52,14 @@
                 {% endif %}
             </span>
         </p>
-        
-        <p><strong>Opis::</strong> {{ transaction.description }}</p>
-        
+
+        <p><strong>Opis:</strong> {{ transaction.description }}</p>
+
         {% if transaction.invoice %}
-        <p><strong>Faktura:</strong> {{ transaction.invoice.invoice_number }} ({{ transaction.invoice.invoice_date|czech_date }})</p>
+        <p><strong>Faktura:</strong> {{ transaction.invoice.invoice_number }} ({{ transaction.invoice.invoice_date|date:"d.m.Y" }})</p>
         {% endif %}
     </div>
+
     <a href="{% url 'history' %}" class="back-link">Powrót do listy transakcji</a>
 </div>
 {% endblock %}

@@ -40,8 +40,18 @@
               <td>{{ reward.brand.name|default:"Dowolna" }}</td>
               <td class="value">{{ reward.point_cost }} pkt</td>
               <td>
-                <span class="status-badge {{ reward.availability|lower }}">
-                  {{ reward.get_availability_display|default:reward.availability }}
+                <span class="availability-badge {{ reward.availability|lower }}">
+                  {% if reward.availability == 'AVAILABLE' %}
+                    W magazynie
+                  {% elif reward.availability == 'AVAILABLE_LAST_UNITS' %}
+                    W magazynie — ostatnie sztuki
+                  {% elif reward.availability == 'ON_DEMAND' %}
+                    Na zamówienie
+                  {% elif reward.availability == 'UNAVAILABLE' %}
+                    Niedostępne
+                  {% else %}
+                    {{ reward.availability }}
+                  {% endif %}
                 </span>
               </td>
               <td style="width: 100px;">

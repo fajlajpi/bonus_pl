@@ -3,6 +3,20 @@
 {% block title %}Moi klienci{% endblock %}
 
 {% block content %}
+<style>
+  .client-table-wrapper {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+  .client-table-wrapper .transactions-table {
+    font-size: 0.85rem;
+    white-space: nowrap;
+  }
+  .client-table-wrapper .transactions-table th,
+  .client-table-wrapper .transactions-table td {
+    padding: 0.4rem 0.6rem;
+  }
+</style>
 <div class="dashboard-container">
   <h2>Moi klienci</h2>
 
@@ -71,7 +85,7 @@
   <p>Wyświetlanie {{ clients|length }} klientów za okres {{ date_from|date:"d.m.Y" }} – {{ date_to|date:"d.m.Y" }}.</p>
 
   <!-- Client Table -->
-  <div class="table-container">
+  <div class="table-container client-table-wrapper">
     <table class="transactions-table">
       <thead>
         <tr>
