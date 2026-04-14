@@ -187,7 +187,8 @@ def upload_history(request):
     """
     Displays the history of uploaded files.
 
-    This view lists all uploaded files in the order of uploading.
+    This view lists all uploaded files in the order of uploading, along with
+    a summary of upload counts by status so managers can quickly assess system health.
 
     Args:
         request (HttpRequest): The HTTP request object.
@@ -195,8 +196,20 @@ def upload_history(request):
     Returns:
         HttpResponse: Renders the upload history template with the list of uploads.
     """
-    uploads = FileUpload.objects.all().order_by('-uploaded_at')
-    return render(request, 'upload_history.html', {'uploads': uploads})
+    from django.db.models import Count
+    uploads = FileUpload.objects.select_related('uploaded_by').order_by('-uploaded_at')
+
+    status_summary = {
+        item['status']: item['count']
+        for item in uploads.values('status').annotate(count=Count('id'))
+    }
+
+    context = {
+        'uploads': uploads,
+        'total': uploads.count(),
+        'status_summary': status_summary,
+    }
+    return render(request, 'manager/upload_history.html', context)
 
 class ManagerRewardRequestListView(ManagerGroupRequiredMixin, ListView):
     """

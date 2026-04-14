@@ -1,0 +1,99 @@
+{% extends "base.html" %}
+{% block title %}Upload History{% endblock %}
+
+{% block content %}
+<div style="width: 100vw; position: relative; left: 50%; right: 50%; margin-left: -50vw; margin-right: -50vw; padding: 0 2rem; background-color: var(--background-color);">
+  <div style="max-width: 1600px; margin: 0 auto; background-color: var(--container-bg); padding: var(--spacing-lg); border-radius: var(--border-radius-lg);">
+
+    <h2>Upload History</h2>
+
+    <!-- Summary stats -->
+    <div class="stats-summary" style="margin-bottom: 1.5rem;">
+      <div class="stat-item">
+        <span class="stat-value">{{ total }}</span>
+        <span class="stat-label">Total uploads</span>
+      </div>
+      <div class="stat-item">
+        <span class="stat-value">{{ status_summary.COMPLETED|default:"0" }}</span>
+        <span class="stat-label">Completed</span>
+      </div>
+      <div class="stat-item">
+        <span class="stat-value">{{ status_summary.PENDING|default:"0" }}</span>
+        <span class="stat-label">Pending</span>
+      </div>
+      <div class="stat-item">
+        <span class="stat-value">{{ status_summary.PROCESSING|default:"0" }}</span>
+        <span class="stat-label">Processing</span>
+      </div>
+      <div class="stat-item">
+        <span class="stat-value">{{ status_summary.FAILED|default:"0" }}</span>
+        <span class="stat-label">Failed</span>
+      </div>
+    </div>
+
+    <div class="table-container">
+      <table class="transactions-table">
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>File</th>
+            <th>Uploaded by</th>
+            <th>Uploaded at</th>
+            <th>Status</th>
+            <th>Processed at</th>
+            <th>Rows processed</th>
+            <th>Errors</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for upload in uploads %}
+          <tr>
+            <td>{{ upload.id }}</td>
+            <td style="font-family: monospace; font-size: 0.85rem;">{{ upload.file.name|cut:"uploads/" }}</td>
+            <td>{{ upload.uploaded_by.get_full_name|default:upload.uploaded_by.username }}</td>
+            <td>{{ upload.uploaded_at|date:"d.m.Y H:i" }}</td>
+            <td>
+              {% if upload.status == 'COMPLETED' %}
+                <span class="status-badge confirmed">Completed</span>
+              {% elif upload.status == 'FAILED' %}
+                <span class="status-badge cancelled">Failed</span>
+              {% elif upload.status == 'PROCESSING' %}
+                <span class="status-badge pending">Processing</span>
+              {% else %}
+                <span class="status-badge pending">Pending</span>
+              {% endif %}
+            </td>
+            <td>{{ upload.processed_at|date:"d.m.Y H:i"|default:"—" }}</td>
+            <td>
+              {% if upload.total_rows > 0 %}
+                {{ upload.processed_rows }} / {{ upload.total_rows }}
+              {% else %}
+                —
+              {% endif %}
+            </td>
+            <td>
+              {% if upload.error_message %}
+                <span style="color: var(--error-color, #c00); font-size: 0.85rem;" title="{{ upload.error_message }}">
+                  ⚠ {{ upload.error_message|truncatechars:80 }}
+                </span>
+              {% else %}
+                —
+              {% endif %}
+            </td>
+          </tr>
+          {% empty %}
+          <tr>
+            <td colspan="8">No uploads found.</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+
+    <div style="margin-top: 1rem;">
+      <a href="{% url 'upload_file' %}" class="submit-button" style="text-decoration: none;">Upload new file</a>
+    </div>
+
+  </div>
+</div>
+{% endblock %}
