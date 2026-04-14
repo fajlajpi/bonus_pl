@@ -2,7 +2,7 @@
 {% load pa_bonus_extras %}
 {% block title %} Manage Request #{{ request_obj.id }} {% endblock %}
 {% block content %}
-<h2>Žádost o čerpání #{{ request_obj.id }}</h2>
+<h2>Reward Request #{{ request_obj.id }}</h2>
 
 <!-- Client Information Table -->
 <div class="client-info-section">
@@ -10,7 +10,7 @@
     <table class="client-info-table">
         <tr>
             <td><strong>Client Number:</strong></td>
-            <td>{{ request_obj.user.user_number }} | <a href="https://report.primavera-and.cz:8080/pentaho/api/repos/%3Apublic%3APAA%3Akarta-klienta%3Akarta%20klienta.wcdf/generatedContent?kodZakaznika={{ request_obj.user.user_number }}" target="_blank">OTEVŘÍT REPORTING</a></td>
+            <td>{{ request_obj.user.user_number }} | <a href="https://report.primavera-and.cz:8080/pentaho/api/repos/%3Apublic%3APAA%3Akarta-klienta%3Akarta%20klienta.wcdf/generatedContent?kodZakaznika={{ request_obj.user.user_number }}" target="_blank">Open Reporting</a></td>
         </tr>
         <tr>
             <td><strong>Full Name:</strong></td>
@@ -26,13 +26,13 @@
         </tr>
         <tr>
             <td><strong>Available Balance:</strong></td>
-            <td>{{ user_balance }} bodů</td>
+            <td>{{ user_balance }} pts</td>
         </tr>
     </table>
 </div>
 
 <div class="points-summary">
-    <p class="total-points">Celková hodnota žádosti: {{ request_obj.total_points }} bodů</p>
+    <p class="total-points">Total request value: {{ request_obj.total_points }} pts</p>
 </div>
 
 <!-- Requested Items (Read-only) -->
