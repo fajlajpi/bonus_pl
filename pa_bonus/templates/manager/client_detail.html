@@ -129,7 +129,7 @@
               {% for brand_bonus in active_contract.brandbonuses.all %}
                 <li>
                   <strong>{{ brand_bonus.brand_id.name }}</strong>: 
-                  {{ brand_bonus.points_ratio }} points per CZK
+                  {{ brand_bonus.points_ratio }} points per PLN
                 </li>
               {% empty %}
                 <li>No brand bonuses specified</li>
@@ -160,9 +160,9 @@
           {% for brand_data in brand_turnovers %}
             <tr class="{% if brand_data.in_contract %}contract-brand{% endif %}">
               <td>{{ brand_data.brand.name }}</td>
-              <td>{{ brand_data.invoice_turnover|floatformat:2 }} CZK</td>
-              <td>{{ brand_data.credit_turnover|floatformat:2 }} CZK</td>
-              <td>{{ brand_data.net_turnover|floatformat:2 }} CZK</td>
+              <td>{{ brand_data.invoice_turnover|floatformat:2 }} PLN</td>
+              <td>{{ brand_data.credit_turnover|floatformat:2 }} PLN</td>
+              <td>{{ brand_data.net_turnover|floatformat:2 }} PLN</td>
               <td class="value {% if brand_data.points < 0 %}negative{% else %}positive{% endif %}">
                 {{ brand_data.points }} pts
               </td>
@@ -183,9 +183,9 @@
           {% if brand_turnovers %}
             <tr class="summary-row">
               <td><strong>TOTAL</strong></td>
-              <td>{{ brand_turnovers|sum_attr:"invoice_turnover"|floatformat:2 }} CZK</td>
-              <td>{{ brand_turnovers|sum_attr:"credit_turnover"|floatformat:2 }} CZK</td>
-              <td>{{ brand_turnovers|sum_attr:"net_turnover"|floatformat:2 }} CZK</td>
+              <td>{{ brand_turnovers|sum_attr:"invoice_turnover"|floatformat:2 }} PLN</td>
+              <td>{{ brand_turnovers|sum_attr:"credit_turnover"|floatformat:2 }} PLN</td>
+              <td>{{ brand_turnovers|sum_attr:"net_turnover"|floatformat:2 }} PLN</td>
               <td class="value {% if point_totals.period_confirmed < 0 %}negative{% else %}positive{% endif %}">
                 <strong>{{ point_totals.period_confirmed }} pts</strong>
               </td>

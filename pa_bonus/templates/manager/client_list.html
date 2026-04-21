@@ -124,7 +124,7 @@
                 No contract
               {% endif %}
             </td>
-            <td>{{ entry.turnover|floatformat:2 }} CZK</td>
+            <td>{{ entry.turnover|floatformat:2 }} PLN</td>
             <td class="value {% if entry.user.confirmed_points < 0 %}negative{% else %}positive{% endif %}">
               {{ entry.user.confirmed_points }} pts
               {% if entry.user.pending_points > 0 %}
