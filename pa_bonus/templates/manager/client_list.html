@@ -3,7 +3,9 @@
 {% block title %} Client Management {% endblock %}
 
 {% block content %}
-<div class="dashboard-container">
+<div style="margin-left: -2rem; margin-right: -2rem;">
+  <div class="reward-admin-wrapper" style="width: 100vw; position: relative; left: 50%; right: 50%; margin-left: -50vw; margin-right: -50vw; padding: 0 2rem; background-color: var(--background-color);">
+    <div class="reward-admin-container" style="max-width: 1600px; margin: 0 auto; background-color: var(--container-bg); padding: var(--spacing-lg); border-radius: var(--border-radius-lg);">
   <h2>Client Management</h2>
   
   <div class="dashboard-intro">
@@ -145,6 +147,8 @@
           {% endfor %}
         </tbody>
       </table>
+    </div>
+  </div>
     </div>
   </div>
 </div>
