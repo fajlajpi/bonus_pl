@@ -202,7 +202,6 @@
                             <button type="submit" class="btn-bulk-action" onclick="return confirmBulkAction()">Apply to Selected</button>
                         </form>
                         <button type="button" class="btn-export" onclick="exportSelected()">Export Selected</button>
-                    <button type="button" class="btn-check-invoices-all" onclick="checkAllExpandedInvoices()">Check All Expanded Invoices</button>
                     </div>
                 </div>
                 
@@ -529,60 +528,6 @@ function exportSelected() {
             button.classList.add('invoice-error');
             button.disabled = false;
         });
-}
-
-
-/**
- * Check invoices for ALL currently expanded rows.
- * Finds every visible "Check Invoices" button and triggers them sequentially
- * with a small delay to avoid hammering the Pentaho server.
- */
-function checkAllExpandedInvoices() {
-    // Find all expanded detail rows by checking which expand-checkboxes are checked
-    const expandedCheckboxes = document.querySelectorAll('.expand-checkbox:checked');
-    const buttons = [];
-
-    expandedCheckboxes.forEach(checkbox => {
-        // The button is inside the same detail-content container
-        const detailContent = checkbox.closest('td').querySelector('.detail-content');
-        if (detailContent) {
-            const btn = detailContent.querySelector('.btn-check-invoices');
-            if (btn && !btn.classList.contains('invoice-clear') && !btn.classList.contains('invoice-warning')) {
-                buttons.push(btn);
-            }
-        }
-    });
-
-    if (buttons.length === 0) {
-        alert('No expanded rows to check. Expand some rows first by clicking ▼.');
-        return;
-    }
-
-    // Update the "Check All" button to show progress
-    const allBtn = document.querySelector('.btn-check-invoices-all');
-    const originalText = allBtn.textContent;
-    let completed = 0;
-    allBtn.disabled = true;
-    allBtn.textContent = `Checking 0/${buttons.length}…`;
-
-    // Process sequentially with 300ms delay between requests
-    function processNext(index) {
-        if (index >= buttons.length) {
-            allBtn.textContent = `✓ Checked ${buttons.length} clients`;
-            allBtn.disabled = false;
-            // Reset after 5 seconds
-            setTimeout(() => { allBtn.textContent = originalText; }, 5000);
-            return;
-        }
-
-        checkInvoices(buttons[index]);
-        completed++;
-        allBtn.textContent = `Checking ${completed}/${buttons.length}…`;
-
-        setTimeout(() => processNext(index + 1), 300);
-    }
-
-    processNext(0);
 }
 
 
