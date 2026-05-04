@@ -24,7 +24,7 @@ from dateutil.relativedelta import relativedelta
 import openpyxl
 from openpyxl.styles import Font, PatternFill
 import io
-
+from pa_bonus.services.pentaho import get_unpaid_invoices
 
 logger = logging.getLogger(__name__)
 
@@ -1429,3 +1429,53 @@ class ClientCreateView(ManagerGroupRequiredMixin, View):
             )
         
         return ''.join(message_parts)
+
+class UnpaidInvoicesCheckView(ManagerGroupRequiredMixin, View):
+    """
+    (Managers Only) JSON endpoint for checking unpaid invoices via Pentaho.
+    
+    Called via AJAX from the Enhanced Reward Requests page.
+    
+    GET /manager/check-invoices/?user_id=<pk>
+    
+    Returns JSON:
+        {
+            "success": true/false,
+            "total_rows": 2,
+            "total_amount": 18876.08,
+            "error": null,
+            "invoices": [
+                {
+                    "invoice_number": "F1-5970/2026",
+                    "date_issued": "7. 4. 2026",
+                    "amount_excl_vat": 4577.66,
+                    "invoice_id": "C43L600101"
+                }
+            ]
+        }
+    """
+ 
+    def get(self, request):
+        user_id = request.GET.get("user_id")
+        if not user_id:
+            return JsonResponse({"success": False, "error": "No user_id provided."}, status=400)
+ 
+        client = get_object_or_404(User, pk=user_id)
+        result = get_unpaid_invoices(client.user_number)
+ 
+        return JsonResponse({
+            "success": result["success"],
+            "total_rows": result["total_rows"],
+            "total_amount": result["total_amount"],
+            "error": result["error"],
+            "invoices": [
+                {
+                    "invoice_number": inv.invoice_number,
+                    "date_issued": inv.date_issued.strftime("%-d. %-m. %Y") if inv.date_issued else "",
+                    "amount_excl_vat": inv.amount_excl_vat,
+                    "invoice_id": inv.invoice_id,
+                }
+                for inv in result["invoices"]
+            ],
+        })
+ 

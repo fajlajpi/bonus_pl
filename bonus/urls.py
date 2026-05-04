@@ -79,6 +79,7 @@ urlpatterns.extend([
          name='reward_request_quick_edit'),
     path('manager/reports/', vr.ReportsHubView.as_view(), name='reports_hub'),
     path('manager/reports/download/', vr.ReportDownloadView.as_view(), name='report_download'),
+    path('manager/check-invoices/', vm.UnpaidInvoicesCheckView.as_view(), name='check_invoices'),
 ])
 
 # SALES REP FACING URLS

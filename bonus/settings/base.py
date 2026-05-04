@@ -146,3 +146,18 @@ LOGGING = {
         },
     },
 }
+
+# ============================================================
+# PENTAHO INTEGRATION
+# ============================================================
+
+# Pentaho CDA Integration
+# These credentials are used to query the Pentaho reporting server
+# for unpaid invoices via HTTP Basic Auth.
+PENTAHO_BASE_URL = os.getenv("PENTAHO_BASE_URL", "https://report.primavera-and.cz:8080")
+PENTAHO_USERNAME = os.getenv("PENTAHO_USERNAME", "")
+PENTAHO_PASSWORD = os.getenv("PENTAHO_PASSWORD", "")
+
+# These rarely change, but can be overridden if needed:
+PENTAHO_CDA_PATH = "/public/PAA/karta-klienta/karta klienta.cda"
+PENTAHO_DATA_ACCESS_ID = "sqlFaktury"

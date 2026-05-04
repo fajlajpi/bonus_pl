@@ -3077,3 +3077,149 @@ select.form-control[multiple] {
 .dashboard-section form {
   display: inline;
 }
+
+/* ============================================================
+   INLINE INVOICE CHECK STYLES — Add to pa_bonus/static/style.css
+   ============================================================ */
+
+/* Check Invoices Button (per-row) */
+.btn-check-invoices {
+  padding: 0.3rem 0.8rem;
+  border: 1px solid var(--primary-color);
+  background-color: white;
+  color: var(--primary-color);
+  border-radius: var(--border-radius-sm);
+  cursor: pointer;
+  font-size: 0.85rem;
+  font-weight: bold;
+  transition: all 0.2s;
+}
+
+.btn-check-invoices:hover {
+  background-color: var(--primary-color);
+  color: white;
+}
+
+.btn-check-invoices.loading {
+  background-color: var(--neutral-bg);
+  color: #666;
+  border-color: #ccc;
+  cursor: wait;
+}
+
+.btn-check-invoices.invoice-clear {
+  background-color: var(--success-color);
+  color: white;
+  border-color: var(--success-color);
+}
+
+.btn-check-invoices.invoice-warning {
+  background-color: var(--error-color);
+  color: white;
+  border-color: var(--error-color);
+  animation: pulse-warning 2s ease-in-out;
+}
+
+.btn-check-invoices.invoice-error {
+  background-color: #f59e0b;
+  color: white;
+  border-color: #f59e0b;
+}
+
+@keyframes pulse-warning {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.05); }
+}
+
+/* Check All Button (top of page) */
+.btn-check-invoices-all {
+  padding: 0.5rem 1rem;
+  border: 2px solid var(--primary-color);
+  background-color: white;
+  color: var(--primary-color);
+  border-radius: var(--border-radius-sm);
+  cursor: pointer;
+  font-size: 0.9rem;
+  font-weight: bold;
+  transition: all 0.2s;
+  margin-left: 0.5rem;
+}
+
+.btn-check-invoices-all:hover {
+  background-color: var(--primary-color);
+  color: white;
+}
+
+.btn-check-invoices-all:disabled {
+  background-color: var(--neutral-bg);
+  color: #999;
+  border-color: #ccc;
+  cursor: wait;
+}
+
+/* Invoice Results Container */
+.invoice-results {
+  font-size: 0.85rem;
+}
+
+.invoice-loading {
+  color: #666;
+  font-style: italic;
+}
+
+/* Result States */
+.invoice-result-clear {
+  color: var(--success-color);
+  font-weight: bold;
+  padding: 0.4rem 0;
+}
+
+.invoice-result-warning {
+  border: 1px solid var(--error-color);
+  border-radius: var(--border-radius-sm);
+  padding: 0.5rem;
+  background-color: #fff5f5;
+}
+
+.invoice-result-header {
+  margin-bottom: 0.5rem;
+  padding-bottom: 0.4rem;
+  border-bottom: 1px solid #fed7d7;
+}
+
+.invoice-result-error {
+  color: #92400e;
+  background-color: #fef3c7;
+  padding: 0.5rem;
+  border-radius: var(--border-radius-sm);
+  border: 1px solid #fcd34d;
+}
+
+.invoice-error-msg {
+  color: var(--error-color);
+  font-weight: bold;
+}
+
+/* Mini Invoice Table (inside expanded row) */
+.invoice-mini-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.82rem;
+}
+
+.invoice-mini-table th {
+  background-color: #fee2e2;
+  padding: 0.3rem 0.5rem;
+  text-align: left;
+  font-size: 0.8rem;
+  color: #991b1b;
+}
+
+.invoice-mini-table td {
+  padding: 0.3rem 0.5rem;
+  border-bottom: 1px solid #fed7d7;
+}
+
+.invoice-mini-table tr:last-child td {
+  border-bottom: none;
+}

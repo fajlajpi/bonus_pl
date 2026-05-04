@@ -202,6 +202,7 @@
                             <button type="submit" class="btn-bulk-action" onclick="return confirmBulkAction()">Apply to Selected</button>
                         </form>
                         <button type="button" class="btn-export" onclick="exportSelected()">Export Selected</button>
+                    <button type="button" class="btn-check-invoices-all" onclick="checkAllExpandedInvoices()">Check All Expanded Invoices</button>
                     </div>
                 </div>
                 
@@ -273,11 +274,22 @@
                                                     <dd>{{ request.user.region.name|default:"Not assigned" }}</dd>
                                                     <dt>Balance:</dt>
                                                     <dd>{{ request.user.get_balance }} points</dd>
-                                                    <dt>Client Link:</dt>
-                                                    <dd>
-                                                        <a href="https://report.primavera-and.cz:8080/pentaho/api/repos/%3Apublic%3APAA%3Akarta-klienta%3Akarta%20klienta.wcdf/generatedContent?kodZakaznika={{ request.user.user_number }}" 
-                                                           target="_blank">Open in Reporting →</a>
-                                                    </dd>
+                                                    <dt>Unpaid Invoices:</dt>
+                                                <dd>
+                                                    <button type="button" 
+                                                            class="btn-check-invoices" 
+                                                            data-user-id="{{ request.user.pk }}"
+                                                            data-user-number="{{ request.user.user_number }}"
+                                                            onclick="checkInvoices(this)">
+                                                        Check Invoices
+                                                    </button>
+                                                    <div class="invoice-results" id="invoice-results-{{ request.user.pk }}" style="display:none; margin-top: 0.5rem;"></div>
+                                                </dd>
+                                                <dt>Reporting:</dt>
+                                                <dd>
+                                                    <a href="https://report.primavera-and.cz:8080/pentaho/api/repos/%3Apublic%3APAA%3Akarta-klienta%3Akarta%20klienta.wcdf/generatedContent?kodZakaznika={{ request.user.user_number }}" 
+                                                       target="_blank" style="font-size: 0.85rem;">Open Full Report →</a>
+                                                </dd>
                                                 </dl>
                                             </div>
                                             
@@ -467,6 +479,169 @@ function exportSelected() {
     
     document.body.appendChild(form);
     form.submit();
+}
+
+/**
+ * Check unpaid invoices for a single client.
+ * Called when clicking the "Check Invoices" button in an expanded row.
+ */
+ function checkInvoices(button) {
+    const userId = button.dataset.userId;
+    const userNumber = button.dataset.userNumber;
+    const resultsDiv = document.getElementById('invoice-results-' + userId);
+
+    // Prevent double-clicks
+    if (button.disabled) return;
+    button.disabled = true;
+    button.textContent = 'Checking…';
+    button.classList.add('loading');
+    resultsDiv.style.display = 'block';
+    resultsDiv.innerHTML = '<span class="invoice-loading">Contacting Pentaho…</span>';
+
+    fetch(`/manager/check-invoices/?user_id=${userId}`)
+        .then(response => response.json())
+        .then(data => {
+            resultsDiv.innerHTML = renderInvoiceResult(data, userNumber);
+            // Update button to show status
+            if (data.success) {
+                if (data.total_rows === 0) {
+                    button.textContent = '✓ No Invoices';
+                    button.classList.remove('loading');
+                    button.classList.add('invoice-clear');
+                } else {
+                    button.textContent = `⚠ ${data.total_rows} Unpaid`;
+                    button.classList.remove('loading');
+                    button.classList.add('invoice-warning');
+                }
+            } else {
+                button.textContent = '✗ Error';
+                button.classList.remove('loading');
+                button.classList.add('invoice-error');
+            }
+            // Allow re-check
+            button.disabled = false;
+        })
+        .catch(error => {
+            console.error('Invoice check failed:', error);
+            resultsDiv.innerHTML = '<span class="invoice-error-msg">Connection error. Try again.</span>';
+            button.textContent = 'Retry';
+            button.classList.remove('loading');
+            button.classList.add('invoice-error');
+            button.disabled = false;
+        });
+}
+
+
+/**
+ * Check invoices for ALL currently expanded rows.
+ * Finds every visible "Check Invoices" button and triggers them sequentially
+ * with a small delay to avoid hammering the Pentaho server.
+ */
+function checkAllExpandedInvoices() {
+    // Find all expanded detail rows by checking which expand-checkboxes are checked
+    const expandedCheckboxes = document.querySelectorAll('.expand-checkbox:checked');
+    const buttons = [];
+
+    expandedCheckboxes.forEach(checkbox => {
+        // The button is inside the same detail-content container
+        const detailContent = checkbox.closest('td').querySelector('.detail-content');
+        if (detailContent) {
+            const btn = detailContent.querySelector('.btn-check-invoices');
+            if (btn && !btn.classList.contains('invoice-clear') && !btn.classList.contains('invoice-warning')) {
+                buttons.push(btn);
+            }
+        }
+    });
+
+    if (buttons.length === 0) {
+        alert('No expanded rows to check. Expand some rows first by clicking ▼.');
+        return;
+    }
+
+    // Update the "Check All" button to show progress
+    const allBtn = document.querySelector('.btn-check-invoices-all');
+    const originalText = allBtn.textContent;
+    let completed = 0;
+    allBtn.disabled = true;
+    allBtn.textContent = `Checking 0/${buttons.length}…`;
+
+    // Process sequentially with 300ms delay between requests
+    function processNext(index) {
+        if (index >= buttons.length) {
+            allBtn.textContent = `✓ Checked ${buttons.length} clients`;
+            allBtn.disabled = false;
+            // Reset after 5 seconds
+            setTimeout(() => { allBtn.textContent = originalText; }, 5000);
+            return;
+        }
+
+        checkInvoices(buttons[index]);
+        completed++;
+        allBtn.textContent = `Checking ${completed}/${buttons.length}…`;
+
+        setTimeout(() => processNext(index + 1), 300);
+    }
+
+    processNext(0);
+}
+
+
+/**
+ * Render the invoice check result as HTML.
+ */
+function renderInvoiceResult(data, userNumber) {
+    if (!data.success) {
+        return `<div class="invoice-result-error">
+                    <strong>Error:</strong> ${escapeHtml(data.error)}
+                </div>`;
+    }
+
+    if (data.total_rows === 0) {
+        return `<div class="invoice-result-clear">
+                    ✓ No unpaid invoices
+                </div>`;
+    }
+
+    // Build invoice table
+    let rows = data.invoices.map(inv =>
+        `<tr>
+            <td><strong>${escapeHtml(inv.invoice_number)}</strong></td>
+            <td>${escapeHtml(inv.date_issued)}</td>
+            <td style="text-align:right; color:red; font-weight:bold;">
+                ${formatNumber(inv.amount_excl_vat)} CZK
+            </td>
+        </tr>`
+    ).join('');
+
+    return `<div class="invoice-result-warning">
+                <div class="invoice-result-header">
+                    ⚠ <strong>${data.total_rows} unpaid invoice${data.total_rows > 1 ? 's' : ''}</strong>
+                    — Total: <span style="color:red; font-weight:bold;">${formatNumber(data.total_amount)} CZK</span>
+                </div>
+                <table class="invoice-mini-table">
+                    <thead>
+                        <tr>
+                            <th>Invoice</th>
+                            <th>Issued</th>
+                            <th style="text-align:right;">Amount (excl. VAT)</th>
+                        </tr>
+                    </thead>
+                    <tbody>${rows}</tbody>
+                </table>
+            </div>`;
+}
+
+
+/** Format a number with spaces as thousands separator and 2 decimals. */
+function formatNumber(num) {
+    return num.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, '\u00A0');
+}
+
+/** Basic HTML escaping. */
+function escapeHtml(str) {
+    const div = document.createElement('div');
+    div.textContent = str;
+    return div.innerHTML;
 }
 </script>
 {% endblock %}
