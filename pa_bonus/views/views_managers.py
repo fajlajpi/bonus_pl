@@ -347,8 +347,8 @@ class TransactionApprovalView(ManagerGroupRequiredMixin, View):
         """
         today = timezone.now().date()
         
-        # Default to showing transactions from 3 months ago
-        default_approval_date = today - relativedelta(months=3)
+        # Default to showing transactions from 2 months ago
+        default_approval_date = today - relativedelta(months=2)
         default_year = default_approval_date.year
         default_month = default_approval_date.month
         
